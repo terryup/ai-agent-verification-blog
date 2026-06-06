@@ -1,0 +1,55 @@
+<svg width="1400" height="760" viewBox="0 0 1400 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-15%" y="-20%" width="130%" height="145%">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#0F172A" flood-opacity="0.11"/>
+    </filter>
+    <marker id="arrow-blue" markerWidth="16" markerHeight="16" refX="11" refY="8" orient="auto">
+      <path d="M2 2 L14 8 L2 14 Z" fill="#2563EB"/>
+    </marker>
+    <marker id="arrow-teal" markerWidth="16" markerHeight="16" refX="11" refY="8" orient="auto">
+      <path d="M2 2 L14 8 L2 14 Z" fill="#0F766E"/>
+    </marker>
+  </defs>
+  <rect width="1400" height="760" rx="28" fill="#F8FAFC"/>
+  <g font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif">
+    <g filter="url(#shadow)">
+      <rect x="86" y="84" width="1228" height="576" rx="36" fill="#FFFFFF" stroke="#D8E2EE"/>
+    </g>
+
+    <rect x="132" y="156" width="310" height="360" rx="30" fill="#EFF6FF" stroke="#93C5FD"/>
+    <rect x="530" y="126" width="340" height="420" rx="34" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="958" y="156" width="310" height="360" rx="30" fill="#ECFDF5" stroke="#99F6E4"/>
+
+    <rect x="170" y="206" width="80" height="32" rx="16" fill="#DBEAFE"/>
+    <text x="210" y="228" text-anchor="middle" fill="#1D4ED8" font-size="14" font-weight="900">本地</text>
+    <text x="170" y="282" fill="#1D4ED8" font-size="29" font-weight="900">虚拟环境</text>
+    <text x="170" y="326" fill="#64748B" font-size="17">fake / mock / 最小链路</text>
+    <rect x="170" y="386" width="224" height="52" rx="17" fill="#FFFFFF"/>
+    <text x="282" y="419" text-anchor="middle" fill="#1E3A8A" font-size="16" font-weight="900">消灭低级不确定性</text>
+    <text x="282" y="472" text-anchor="middle" fill="#64748B" font-size="16">契约 / fake / 断连用例</text>
+
+    <text x="700" y="196" text-anchor="middle" fill="#172033" font-size="30" font-weight="900">证据包</text>
+    <text x="700" y="234" text-anchor="middle" fill="#64748B" font-size="17">迁移的是验证资产，不只是代码</text>
+    <rect x="580" y="286" width="240" height="56" rx="18" fill="#EFF6FF" stroke="#93C5FD"/>
+    <text x="700" y="321" text-anchor="middle" fill="#1D4ED8" font-size="18" font-weight="900">测试客户端 / probe</text>
+    <rect x="580" y="370" width="240" height="56" rx="18" fill="#F0FDFA" stroke="#99F6E4"/>
+    <text x="700" y="405" text-anchor="middle" fill="#0F766E" font-size="18" font-weight="900">通过标准 / 字段</text>
+    <rect x="580" y="454" width="240" height="56" rx="18" fill="#FFF7ED" stroke="#FDBA74"/>
+    <text x="700" y="489" text-anchor="middle" fill="#B45309" font-size="18" font-weight="900">风险 / 归因路径</text>
+
+    <rect x="996" y="206" width="80" height="32" rx="16" fill="#CCFBF1"/>
+    <text x="1036" y="228" text-anchor="middle" fill="#0F766E" font-size="14" font-weight="900">真机</text>
+    <text x="996" y="282" fill="#0F766E" font-size="29" font-weight="900">真实环境</text>
+    <text x="996" y="326" fill="#64748B" font-size="17">真实设备 / 真实时序</text>
+    <rect x="996" y="386" width="224" height="52" rx="17" fill="#FFFFFF"/>
+    <text x="1108" y="419" text-anchor="middle" fill="#0F766E" font-size="16" font-weight="900">用同一套工具取证</text>
+    <text x="1108" y="472" text-anchor="middle" fill="#64748B" font-size="16">trace / metrics / logs</text>
+
+    <path d="M454 370 H516" stroke="#2563EB" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
+    <path d="M884 370 H944" stroke="#2563EB" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow-blue)"/>
+    <path d="M1118 540 C950 612 450 612 282 540" stroke="#0F766E" stroke-width="7" stroke-linecap="round" marker-end="url(#arrow-teal)"/>
+
+    <rect x="420" y="618" width="560" height="48" rx="24" fill="#ECFDF5" stroke="#99F6E4"/>
+    <text x="700" y="649" text-anchor="middle" fill="#0F766E" font-size="18" font-weight="900">失败后回喂同一种证据，Agent 才能定位</text>
+  </g>
+</svg>
