@@ -7,36 +7,58 @@
   <title>zixuan's blog</title>
   <link rel="stylesheet" href="shared.css" />
   <style>
-    /* ── Page Header ─────────────────────────── */
-    .page-intro {
+    /* ── Intro ─────────────────────────────────── */
+    .intro {
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 80px 32px 0;
+      padding: 80px 32px 48px;
     }
 
-    .page-intro h1 {
-      font-size: clamp(48px, 8vw, 80px);
+    .intro h1 {
+      font-size: clamp(36px, 5vw, 56px);
       font-weight: 800;
-      line-height: 1.05;
-      letter-spacing: -0.04em;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
       color: var(--text-primary);
       text-wrap: balance;
+      margin-bottom: 12px;
     }
 
-    .page-intro h1 span {
-      color: var(--accent);
+    .intro p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      line-height: 1.6;
     }
 
-    /* ── Blog Posts ──────────────────────────── */
-    .blog-posts {
+    /* ── Main Grid ─────────────────────────────── */
+    .home-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-areas: "newest sidebar";
+      gap: 48px 80px;
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 64px 32px 96px;
+      padding: 0 32px 96px;
     }
 
+    /* ── Newest (left column) ──────────────────── */
+    .newest {
+      grid-area: newest;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 32px;
+    }
+
+    /* ── Post (text-based, no cards) ───────────── */
     .post {
-      padding: 56px 0;
-      border-bottom: 1px solid var(--border);
+      padding: 40px 0;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .post:first-child {
@@ -48,20 +70,17 @@
     }
 
     .post-title {
-      font-size: clamp(32px, 5vw, 52px);
+      font-size: clamp(24px, 3vw, 32px);
       font-weight: 800;
-      line-height: 1.12;
-      letter-spacing: -0.03em;
-      margin-bottom: 20px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
       text-wrap: balance;
-      max-width: 18ch;
     }
 
     .post-title a {
       color: var(--text-primary);
       text-decoration: none;
-      text-decoration-thickness: 3px;
-      text-underline-offset: 4px;
       transition: color var(--duration-fast) var(--ease-out);
     }
 
@@ -69,72 +88,168 @@
       color: var(--accent);
     }
 
-    .post-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-
-    .post-tag {
-      display: inline-block;
-      padding: 5px 14px;
-      border-radius: var(--radius-full);
-      font-size: 13px;
-      font-weight: 600;
-      background: var(--signal-soft);
-      color: var(--signal);
-      border: 1px solid oklch(0.7 0.18 55 / 0.2);
-      transition: all var(--duration-fast) var(--ease-out);
-    }
-
-    .post-tag:hover {
-      background: var(--signal);
-      color: var(--bg-card);
-      border-color: var(--signal);
+    .post-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 12px;
+      font-style: italic;
     }
 
     .post-excerpt {
-      font-size: 18px;
+      font-size: 17px;
       line-height: 1.7;
       color: var(--text-secondary);
-      margin-bottom: 24px;
-      max-width: 55ch;
+      margin-bottom: 20px;
     }
 
-    .post-link {
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-bottom: 16px;
+    }
+
+    /* ── Read more with arrow animation ────────── */
+    .read-more {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 15px;
+      font-weight: 600;
       color: var(--accent);
-      transition: gap var(--duration-fast) var(--ease-out);
+      text-decoration: none;
+      transition: color var(--duration-fast) var(--ease-out);
     }
 
-    .post-link:hover {
-      gap: 14px;
+    .read-more:hover {
       color: var(--accent-hover);
     }
 
-    .post-link svg {
-      width: 18px;
-      height: 18px;
-      transition: transform var(--duration-fast) var(--ease-out);
+    .read-more-arrows {
+      display: inline-flex;
+      align-items: center;
     }
 
-    .post-link:hover svg {
+    .read-more-arrows svg {
+      width: 8px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: opacity var(--duration-fast) var(--ease-out),
+                  transform var(--duration-fast) var(--ease-out);
+    }
+
+    .read-more-arrows svg:nth-child(1) { opacity: 1; }
+    .read-more-arrows svg:nth-child(2) { opacity: 0; margin-left: -2px; }
+    .read-more-arrows svg:nth-child(3) { opacity: 0; margin-left: -2px; }
+
+    .read-more:hover .read-more-arrows svg:nth-child(2) {
+      opacity: 0.66;
+      transform: translateX(2px);
+    }
+
+    .read-more:hover .read-more-arrows svg:nth-child(3) {
+      opacity: 0.35;
       transform: translateX(4px);
     }
 
-    /* ── Responsive ──────────────────────────── */
-    @media (max-width: 640px) {
-      .page-intro { padding: 48px 20px 0; }
-      .page-intro h1 { font-size: clamp(36px, 10vw, 48px); }
-      .blog-posts { padding: 40px 20px 64px; }
-      .post { padding: 40px 0; }
-      .post-title { font-size: clamp(26px, 7vw, 36px); }
-      .post-excerpt { font-size: 16px; }
+    /* ── Sidebar (right column) ────────────────── */
+    .sidebar {
+      grid-area: sidebar;
+    }
+
+    .sidebar-section {
+      margin-bottom: 48px;
+    }
+
+    .sidebar-section h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .category-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .category-list a {
+      display: block;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all var(--duration-fast) var(--ease-out);
+    }
+
+    .category-list a:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .sidebar-post {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-post:last-child {
+      border-bottom: none;
+    }
+
+    .sidebar-post-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-post-title a {
+      color: var(--text-primary);
+      text-decoration: none;
+      transition: color var(--duration-fast) var(--ease-out);
+    }
+
+    .sidebar-post-title a:hover {
+      color: var(--accent);
+    }
+
+    .sidebar-post-date {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Featured post (first post, bigger) ────── */
+    .post.featured .post-title {
+      font-size: clamp(28px, 4vw, 42px);
+    }
+
+    .post.featured .post-excerpt {
+      font-size: 18px;
+    }
+
+    /* ── Responsive ────────────────────────────── */
+    @media (max-width: 768px) {
+      .home-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas: "newest" "sidebar";
+        gap: 48px;
+      }
+
+      .intro { padding: 48px 20px 32px; }
+      .home-grid { padding: 0 20px 64px; }
+      .post { padding: 32px 0; }
+      .post.featured .post-title { font-size: clamp(24px, 7vw, 32px); }
     }
   </style>
   <script src="theme.js"></script>
@@ -158,48 +273,88 @@
     </div>
   </header>
 
-  <div class="page-intro">
-    <h1><span>zixuan</span>'s blog</h1>
+  <div class="intro">
+    <h1>zixuan's blog</h1>
+    <p>复杂系统工程实践，AI 辅助开发，测试工程化。</p>
   </div>
 
-  <main class="blog-posts">
-    <article class="post">
-      <h2 class="post-title">
-        <a href="./ai-agent-verification.html">复杂工程里的 AI Agent：如何解决验证难题</a>
-      </h2>
-      <div class="post-tags">
-        <span class="post-tag">复杂工程</span>
-        <span class="post-tag">验证拆层</span>
-        <span class="post-tag">替身环境</span>
-        <span class="post-tag">证据闭环</span>
-      </div>
-      <p class="post-excerpt">
-        AI 写代码越来越快，但复杂工程真正卡住的地方往往不是"写不出来"，而是"怎么证明它写对了"。
-      </p>
-      <a class="post-link" href="./ai-agent-verification.html">
-        阅读全文
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </a>
-    </article>
+  <main class="home-grid">
+    <!-- Left: Article list -->
+    <div class="newest">
+      <p class="section-label">Latest</p>
 
-    <article class="post">
-      <h2 class="post-title">
-        <a href="./ai-agent-testing-practice-blog.html">如何设计测试 Agent：Harness 自测体系的架构方法</a>
-      </h2>
-      <div class="post-tags">
-        <span class="post-tag">Harness 自测</span>
-        <span class="post-tag">测试 Agent</span>
-        <span class="post-tag">证据闭环</span>
-        <span class="post-tag">音视频验证</span>
+      <article class="post featured">
+        <h2 class="post-title">
+          <a href="./ai-agent-verification.html">复杂工程里的 AI Agent：如何解决验证难题</a>
+        </h2>
+        <p class="post-subtitle">AI 写代码越来越快，但验证才是真正的瓶颈</p>
+        <div class="post-meta">
+          <span>2025 年 6 月</span>
+        </div>
+        <p class="post-excerpt">
+          AI 写代码越来越快，但复杂工程真正卡住的地方往往不是"写不出来"，而是"怎么证明它写对了"。这篇文章探讨如何把验证拆成可交付的证据链，让 Agent 在失败、修复、再验证之间快速循环。
+        </p>
+        <a class="read-more" href="./ai-agent-verification.html">
+          阅读全文
+          <span class="read-more-arrows">
+            <svg viewBox="0 0 8 12"><path d="M1 6h5M4 2l3 4-3 4"/></svg>
+            <svg viewBox="0 0 8 12"><path d="M1 6h5M4 2l3 4-3 4"/></svg>
+            <svg viewBox="0 0 8 12"><path d="M1 6h5M4 2l3 4-3 4"/></svg>
+          </span>
+        </a>
+      </article>
+
+      <article class="post">
+        <h2 class="post-title">
+          <a href="./ai-agent-testing-practice-blog.html">如何设计测试 Agent：Harness 自测体系的架构方法</a>
+        </h2>
+        <p class="post-subtitle">从驱动真实系统到输出可复查报告</p>
+        <div class="post-meta">
+          <span>2025 年 6 月</span>
+        </div>
+        <p class="post-excerpt">
+          如何在 Harness 自测体系里驱动真实系统、采集证据、稳定评估，并输出可复查报告。涵盖测试 Agent 的职责定义、五条设计原则、七层架构，以及音视频业务的验证落地。
+        </p>
+        <a class="read-more" href="./ai-agent-testing-practice-blog.html">
+          阅读全文
+          <span class="read-more-arrows">
+            <svg viewBox="0 0 8 12"><path d="M1 6h5M4 2l3 4-3 4"/></svg>
+            <svg viewBox="0 0 8 12"><path d="M1 6h5M4 2l3 4-3 4"/></svg>
+            <svg viewBox="0 0 8 12"><path d="M1 6h5M4 2l3 4-3 4"/></svg>
+          </span>
+        </a>
+      </article>
+    </div>
+
+    <!-- Right: Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3>Categories</h3>
+        <ul class="category-list">
+          <li><a href="#">复杂工程</a></li>
+          <li><a href="#">AI Agent</a></li>
+          <li><a href="#">测试架构</a></li>
+          <li><a href="#">验证工程</a></li>
+          <li><a href="#">音视频采集</a></li>
+        </ul>
       </div>
-      <p class="post-excerpt">
-        如何在 Harness 自测体系里驱动真实系统、采集证据、稳定评估，并输出可复查报告。
-      </p>
-      <a class="post-link" href="./ai-agent-testing-practice-blog.html">
-        阅读全文
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-      </a>
-    </article>
+
+      <div class="sidebar-section">
+        <h3>Recommended</h3>
+        <div class="sidebar-post">
+          <p class="sidebar-post-title">
+            <a href="./ai-agent-verification.html">复杂工程里的 AI Agent：如何解决验证难题</a>
+          </p>
+          <p class="sidebar-post-date">2025 年 6 月</p>
+        </div>
+        <div class="sidebar-post">
+          <p class="sidebar-post-title">
+            <a href="./ai-agent-testing-practice-blog.html">如何设计测试 Agent：Harness 自测体系的架构方法</a>
+          </p>
+          <p class="sidebar-post-date">2025 年 6 月</p>
+        </div>
+      </div>
+    </aside>
   </main>
 
   <footer class="site-footer">
