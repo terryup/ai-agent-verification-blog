@@ -6,52 +6,71 @@
   <title>复杂工程里的 AI Agent：如何解决验证难题</title>
   <style>
     :root {
-      --color-text: hsl(222deg 22% 5%);
-      --color-background: hsl(0deg 0% 100%);
-      --color-blurred-background: hsl(0deg 0% 95% / 0.75);
-      --color-primary: hsl(240deg 95% 62%);
-      --color-secondary: hsl(333deg 100% 45%);
-      --color-tertiary: hsl(255deg 85% 30%);
-      --color-decorative: hsl(200deg 75% 65%);
-      --color-gray-50: hsl(225deg 40% 96%);
-      --color-gray-100: hsl(225deg 25% 92%);
-      --color-gray-200: hsl(225deg 16% 86%);
-      --color-gray-300: hsl(225deg 8% 80%);
-      --color-gray-400: hsl(225deg 8% 70%);
-      --color-gray-500: hsl(225deg 7% 60%);
-      --color-gray-600: hsl(225deg 15% 50%);
-      --color-gray-700: hsl(225deg 12% 40%);
-      --color-gray-800: hsl(225deg 20% 30%);
-      --color-gray-900: hsl(225deg 25% 20%);
-      --color-gray-1000: hsl(225deg 15% 15%);
-      --max-width: 68.75rem;
-      --radius-sm: 8px;
-      --radius-md: 16px;
-      --radius-lg: 24px;
-      --shadow-sm: 0 2px 8px hsl(225deg 25% 20% / 0.06);
-      --shadow-md: 0 8px 24px hsl(225deg 25% 20% / 0.08);
-      --shadow-lg: 0 16px 48px hsl(225deg 25% 20% / 0.12);
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
-      --font-family-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+      --color-bg: hsl(0deg 0% 100%);
+      --color-bg-elevated: hsl(220deg 20% 97%);
+      --color-bg-sunken: hsl(220deg 20% 94%);
+      --color-text: hsl(220deg 20% 10%);
+      --color-text-secondary: hsl(220deg 15% 45%);
+      --color-text-tertiary: hsl(220deg 10% 60%);
+      --color-border: hsl(220deg 20% 90%);
+      --color-border-subtle: hsl(220deg 20% 94%);
+      --color-primary: hsl(240deg 80% 60%);
+      --color-primary-soft: hsl(240deg 80% 60% / 0.08);
+      --color-secondary: hsl(330deg 80% 55%);
+      --color-accent: hsl(200deg 80% 55%);
+      --color-success: hsl(145deg 70% 40%);
+      --shadow-sm: 0 1px 2px hsl(220deg 20% 10% / 0.04);
+      --shadow-md: 0 4px 12px hsl(220deg 20% 10% / 0.08);
+      --shadow-lg: 0 12px 32px hsl(220deg 20% 10% / 0.12);
+      --shadow-xl: 0 20px 48px hsl(220deg 20% 10% / 0.16);
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --max-width: 1200px;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 
       /* Legacy aliases */
-      --bg: var(--color-gray-50);
-      --paper: var(--color-background);
+      --bg: var(--color-bg-elevated);
+      --paper: var(--color-bg);
       --ink: var(--color-text);
-      --muted: var(--color-gray-500);
-      --line: var(--color-gray-200);
+      --muted: var(--color-text-secondary);
+      --line: var(--color-border);
       --blue: var(--color-primary);
       --teal: hsl(170deg 70% 35%);
       --amber: hsl(37deg 100% 50%);
-      --green: hsl(145deg 100% 25%);
+      --green: var(--color-success);
       --red: hsl(340deg 95% 39%);
-      --soft-blue: hsl(240deg 95% 62% / 0.06);
-      --soft-teal: hsl(170deg 70% 35% / 0.06);
-      --soft-amber: hsl(37deg 100% 50% / 0.06);
-      --soft-green: hsl(145deg 100% 25% / 0.06);
-      --soft-red: hsl(340deg 95% 39% / 0.06);
+      --soft-blue: var(--color-primary-soft);
+      --soft-teal: hsl(170deg 70% 35% / 0.08);
+      --soft-amber: hsl(37deg 100% 50% / 0.08);
+      --soft-green: hsl(145deg 70% 40% / 0.08);
+      --soft-red: hsl(340deg 95% 39% / 0.08);
       --shadow: var(--shadow-lg);
       --radius: var(--radius-md);
+    }
+
+    [data-theme="dark"] {
+      --color-bg: hsl(220deg 20% 8%);
+      --color-bg-elevated: hsl(220deg 20% 12%);
+      --color-bg-sunken: hsl(220deg 20% 5%);
+      --color-text: hsl(220deg 10% 92%);
+      --color-text-secondary: hsl(220deg 15% 65%);
+      --color-text-tertiary: hsl(220deg 10% 50%);
+      --color-border: hsl(220deg 20% 18%);
+      --color-border-subtle: hsl(220deg 20% 14%);
+      --color-primary: hsl(240deg 80% 65%);
+      --color-primary-soft: hsl(240deg 80% 65% / 0.12);
+      --color-secondary: hsl(330deg 80% 60%);
+      --color-accent: hsl(200deg 80% 60%);
+      --shadow-sm: 0 1px 2px hsl(0deg 0% 0% / 0.2);
+      --shadow-md: 0 4px 12px hsl(0deg 0% 0% / 0.3);
+      --shadow-lg: 0 12px 32px hsl(0deg 0% 0% / 0.4);
+      --shadow-xl: 0 20px 48px hsl(0deg 0% 0% / 0.5);
     }
 
     * {
@@ -65,17 +84,18 @@
     }
 
     body {
-      margin: 0;
-      color: var(--ink);
-      background: var(--bg);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-        "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      color: var(--color-text);
+      background: var(--color-bg);
+      font-family: var(--font-sans);
       line-height: 1.76;
+      -webkit-font-smoothing: antialiased;
+      transition: background var(--transition-base), color var(--transition-base);
     }
 
     a {
-      color: var(--blue);
+      color: var(--color-primary);
       text-decoration: none;
+      transition: color var(--transition-fast);
     }
 
     a:hover {
@@ -973,26 +993,31 @@
     .site-header {
       position: sticky;
       top: 0;
-      z-index: 100;
-      background: var(--color-blurred-background);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--color-gray-100);
+      z-index: 1000;
+      background: hsl(0deg 0% 100% / 0.8);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--color-border-subtle);
+      transition: background var(--transition-base), border-color var(--transition-base);
+    }
+    [data-theme="dark"] .site-header {
+      background: hsl(220deg 20% 8% / 0.8);
     }
     .site-header-inner {
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 16px 24px;
+      padding: 18px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
     .site-logo {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 800;
       color: var(--color-text);
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
       text-decoration: none;
+      transition: color var(--transition-fast);
     }
     .site-logo span {
       background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
@@ -1000,9 +1025,18 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .site-nav { display: flex; gap: 24px; font-size: 15px; font-weight: 500; }
-    .site-nav a { color: var(--color-gray-600); text-decoration: none; transition: color 200ms ease; }
+    .site-nav { display: flex; align-items: center; gap: 32px; font-size: 15px; font-weight: 500; }
+    .site-nav a { color: var(--color-text-secondary); text-decoration: none; transition: color var(--transition-fast); }
     .site-nav a:hover { color: var(--color-text); }
+    .theme-toggle {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--color-border); background: var(--color-bg-elevated);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition-fast);
+    }
+    .theme-toggle:hover { border-color: var(--color-primary); background: var(--color-primary-soft); }
+    .theme-toggle svg { width: 20px; height: 20px; color: var(--color-text-secondary); transition: color var(--transition-fast), transform var(--transition-base); }
+    .theme-toggle:hover svg { color: var(--color-primary); transform: rotate(15deg); }
   </style>
 </head>
 <body>
@@ -1011,6 +1045,14 @@
       <a href="./index.html" class="site-logo"><span>zixuan</span>'s blog</a>
       <nav class="site-nav">
         <a href="./index.html">Home</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        </button>
       </nav>
     </div>
   </header>
@@ -1525,5 +1567,22 @@
       </section>
     </article>
   </main>
+  <script>
+    const themeToggle = document.getElementById('themeToggle');
+    const sunIcon = themeToggle.querySelector('.sun-icon');
+    const moonIcon = themeToggle.querySelector('.moon-icon');
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      if (theme === 'dark') { sunIcon.style.display = 'none'; moonIcon.style.display = 'block'; }
+      else { sunIcon.style.display = 'block'; moonIcon.style.display = 'none'; }
+    }
+    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(savedTheme);
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  </script>
 </body>
 </html>
