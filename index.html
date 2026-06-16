@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>复杂工程里的 AI Agent：如何解决验证难题</title>
+  <meta name="author" content="zixuan" />
+  <title>zixuan's blog</title>
   <style>
     :root {
       --bg: #f7f8f4;
@@ -14,24 +15,12 @@
       --blue: #2563eb;
       --teal: #0f766e;
       --amber: #b45309;
-      --green: #15803d;
-      --red: #b91c1c;
-      --soft-blue: #eff6ff;
-      --soft-teal: #ecfeff;
-      --soft-amber: #fff7ed;
-      --soft-green: #f0fdf4;
-      --soft-red: #fef2f2;
       --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
       --radius: 18px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
@@ -42,22 +31,14 @@
       line-height: 1.76;
     }
 
-    a {
-      color: var(--blue);
-      text-decoration: none;
-    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-    a:hover {
-      text-decoration: underline;
-    }
-
+    /* ── Hero ─────────────────────────────────────────── */
     .hero {
-      min-height: 680px;
       position: relative;
       overflow: hidden;
-      background: #f7efe2;
-      display: flex;
-      align-items: center;
+      background: linear-gradient(135deg, #f7efe2 0%, #eef2ff 50%, #ecfeff 100%);
       border-bottom: 1px solid rgba(15, 23, 42, 0.08);
     }
 
@@ -65,1346 +46,204 @@
       content: "";
       position: absolute;
       inset: 0;
-      background-image:
-        linear-gradient(90deg, rgba(247, 248, 244, 0.97) 0%, rgba(247, 248, 244, 0.86) 36%, rgba(247, 248, 244, 0.18) 68%),
-        url("./agent-boundary-visuals/cover-background-ai-engineering.png");
-      background-size: cover;
-      background-position: center;
-      transform: scale(1.01);
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 40%, rgba(37, 99, 235, 0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 60%, rgba(15, 118, 110, 0.06) 0%, transparent 70%);
     }
 
     .hero-inner {
       position: relative;
-      max-width: 1180px;
-      width: 100%;
+      max-width: 960px;
       margin: 0 auto;
-      padding: 116px 28px 104px;
+      padding: 96px 28px 80px;
+      text-align: center;
     }
 
-    h1 {
-      max-width: 760px;
-      margin: 0 0 24px;
-      font-size: clamp(42px, 7vw, 82px);
-      line-height: 1.04;
-      letter-spacing: 0;
-    }
-
-    .subtitle {
-      max-width: 680px;
-      color: #314155;
-      font-size: 25px;
-      line-height: 1.58;
-      margin: 0 0 34px;
-    }
-
-    .hero-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .hero-tags span {
-      background: rgba(255, 255, 255, 0.74);
-      border: 1px solid rgba(15, 23, 42, 0.1);
-      border-radius: 999px;
-      padding: 9px 15px;
-      color: #334155;
-      font-size: 15px;
-      font-weight: 700;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-    }
-
-    main {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 52px 28px 96px;
-    }
-
-    article {
-      background: transparent;
-    }
-
-    section {
-      margin: 0 0 74px;
-      scroll-margin-top: 28px;
-    }
-
-    .toc {
-      margin: 0 0 54px;
-      padding: 22px;
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      background: rgba(255, 253, 250, 0.86);
-      box-shadow: var(--shadow);
-    }
-
-    .toc-head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .toc-head span {
-      color: var(--teal);
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .toc-head strong {
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .toc-links {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .toc-links a {
+    .hero-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #0f766e);
       display: flex;
       align-items: center;
-      min-height: 44px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: #fff;
-      padding: 10px 12px;
-      color: #334155;
-      font-size: 15px;
-      font-weight: 800;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 28px;
+      margin: 0 auto 24px;
+      box-shadow: 0 8px 32px rgba(37, 99, 235, 0.2);
     }
 
-    .toc-links a:hover {
-      border-color: #93c5fd;
-      color: var(--blue);
+    .hero-name {
+      margin: 0 0 12px;
+      font-size: clamp(36px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+
+    .hero-desc {
+      margin: 0 auto;
+      max-width: 520px;
+      color: #475569;
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    /* ── Articles ─────────────────────────────────────── */
+    .articles {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 56px 28px 96px;
+    }
+
+    .articles-heading {
+      margin: 0 0 32px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .article-card {
+      display: block;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 36px 40px;
+      margin-bottom: 24px;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+      color: inherit;
+    }
+
+    .article-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
       text-decoration: none;
     }
 
-    .toc-links a:last-child {
-      grid-column: 1 / -1;
-    }
-
-    @media (min-width: 1180px) {
-      main {
-        max-width: 1288px;
-        display: grid;
-        grid-template-columns: minmax(0, 940px) 224px;
-        gap: 36px;
-        align-items: start;
-      }
-
-      article {
-        grid-column: 1;
-        grid-row: 1;
-      }
-
-      .toc {
-        grid-column: 2;
-        grid-row: 1;
-        position: sticky;
-        top: 72px;
-        width: auto;
-        max-height: calc(100vh - 128px);
-        overflow: auto;
-        margin: 0;
-        padding: 8px 0 8px 22px;
-        border: 0;
-        border-left: 1px solid rgba(15, 23, 42, 0.12);
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-      }
-
-      .toc-head {
-        display: block;
-        margin-bottom: 16px;
-      }
-
-      .toc-head span {
-        display: block;
-        color: var(--teal);
-        font-size: 13px;
-        letter-spacing: 0.08em;
-      }
-
-      .toc-head strong {
-        display: block;
-        margin-top: 5px;
-        font-size: 13px;
-        line-height: 1.45;
-        font-weight: 700;
-      }
-
-      .toc-links {
-        grid-template-columns: 1fr;
-        gap: 2px;
-      }
-
-      .toc-links a {
-        position: relative;
-        min-height: 0;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        padding: 8px 0 8px 16px;
-        color: #64748b;
-        font-size: 14px;
-        font-weight: 700;
-        line-height: 1.35;
-      }
-
-      .toc-links a::before {
-        content: "";
-        position: absolute;
-        left: -27px;
-        top: 50%;
-        width: 7px;
-        height: 7px;
-        border-radius: 999px;
-        background: #cbd5e1;
-        transform: translateY(-50%);
-      }
-
-      .toc-links a:hover {
-        color: var(--blue);
-        text-decoration: none;
-      }
-
-      .toc-links a:hover::before {
-        background: var(--blue);
-      }
-
-      .toc-links a:last-child {
-        grid-column: auto;
-      }
-    }
-
-    h2 {
-      margin: 0 0 22px;
-      font-size: clamp(30px, 4vw, 44px);
-      line-height: 1.18;
-      letter-spacing: 0;
-    }
-
-    section:target h2 {
+    .article-card:hover .article-title {
       color: var(--blue);
     }
 
-    h3 {
-      margin: 38px 0 14px;
-      font-size: 25px;
-      line-height: 1.32;
-    }
-
-    p {
-      margin: 16px 0;
-      font-size: 18px;
-    }
-
-    .lead {
-      font-size: 21px;
-      line-height: 1.72;
-      color: #2f3d52;
-    }
-
-    .note {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-left: 5px solid var(--teal);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 22px 24px;
-      margin: 28px 0;
-      font-size: 18px;
-    }
-
-    .note strong {
-      color: var(--teal);
-    }
-
-    .figure {
-      margin: 34px 0;
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .figure-title {
+    .article-meta {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--line);
-      background: #ffffff;
-    }
-
-    .figure-title strong {
-      font-size: 18px;
-    }
-
-    .figure-title span {
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .caption {
-      color: var(--muted);
-      font-size: 15px;
-      margin-top: -18px;
-      margin-bottom: 28px;
-      text-align: center;
-    }
-
-    .figure img {
-      width: 100%;
-      display: block;
-    }
-
-    .image-pad {
-      padding: 20px;
-      background: #fff;
-    }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 20px;
-      padding: 24px;
-    }
-
-    .card {
-      border: 1px solid var(--line);
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px;
-    }
-
-    .card h4 {
-      margin: 0 0 10px;
-      font-size: 20px;
-      line-height: 1.35;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 16px;
-    }
-
-    .bad {
-      border-color: #fecaca;
-      background: var(--soft-red);
-    }
-
-    .good {
-      border-color: #bbf7d0;
-      background: var(--soft-green);
-    }
-
-    .bad h4 {
-      color: var(--red);
-    }
-
-    .good h4 {
-      color: var(--green);
-    }
-
-    .system-map {
-      padding: 28px;
-    }
-
-    .process-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 92px minmax(0, 1fr);
-      align-items: center;
-      gap: 18px;
-    }
-
-    .process-box {
-      min-height: 132px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fff;
-      padding: 22px;
-      text-align: center;
-    }
-
-    .process-box strong {
-      display: block;
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .process-box span {
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .arrow {
-      height: 3px;
-      background: var(--blue);
-      position: relative;
-    }
-
-    .arrow::after {
-      content: "";
-      position: absolute;
-      right: -2px;
-      top: 50%;
-      width: 13px;
-      height: 13px;
-      border-top: 3px solid var(--blue);
-      border-right: 3px solid var(--blue);
-      transform: translateY(-50%) rotate(45deg);
-    }
-
-    .module-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 22px;
-    }
-
-    .module {
-      min-height: 110px;
-      border-radius: 15px;
-      padding: 16px;
-      border: 1px solid var(--line);
-      background: #fff;
-    }
-
-    .module strong {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 17px;
-    }
-
-    .module span {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .module:nth-child(1) {
-      background: var(--soft-teal);
-      border-color: #99f6e4;
-    }
-
-    .module:nth-child(2) {
-      background: var(--soft-blue);
-      border-color: #bfdbfe;
-    }
-
-    .module:nth-child(3) {
-      background: var(--soft-amber);
-      border-color: #fed7aa;
-    }
-
-    .module:nth-child(4) {
-      background: var(--soft-green);
-      border-color: #bbf7d0;
-    }
-
-    .boundary-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 12px;
-      padding: 24px;
-    }
-
-    .boundary {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: #fff;
-      padding: 18px 14px;
-      min-height: 154px;
-    }
-
-    .boundary b {
-      display: block;
-      color: var(--blue);
-      font-size: 17px;
-      margin-bottom: 10px;
-    }
-
-    .boundary span {
-      display: block;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .flow {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
-      padding: 24px;
-    }
-
-    .flow-step {
-      position: relative;
-      border-radius: 16px;
-      background: #fff;
-      border: 1px solid var(--line);
-      padding: 20px;
-      min-height: 150px;
-    }
-
-    .flow-step:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      top: 54px;
-      right: -17px;
-      width: 18px;
-      height: 3px;
-      background: var(--blue);
-    }
-
-    .flow-step small {
-      color: var(--muted);
-      font-weight: 800;
-    }
-
-    .flow-step strong {
-      display: block;
-      margin: 8px 0 10px;
-      font-size: 20px;
-    }
-
-    .flow-step span {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .evidence {
-      padding: 24px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .evidence.compact {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .evidence-row {
-      display: grid;
-      grid-template-columns: 190px minmax(0, 1fr);
-      gap: 16px;
-      align-items: stretch;
-    }
-
-    .risk {
-      border-radius: 14px;
-      background: var(--soft-amber);
-      border: 1px solid #fed7aa;
-      padding: 15px;
-      font-weight: 800;
-      color: var(--amber);
-    }
-
-    .proof {
-      border-radius: 14px;
-      background: #fff;
-      border: 1px solid var(--line);
-      padding: 15px;
-      color: #334155;
-    }
-
-    .evidence-card {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: #fff;
-      padding: 16px;
-      display: grid;
-      gap: 12px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
-    }
-
-    .evidence-card strong {
-      color: var(--amber);
-      font-size: 18px;
-      line-height: 1.35;
-    }
-
-    .evidence-card .proof-line {
-      display: grid;
-      grid-template-columns: 54px minmax(0, 1fr);
       gap: 10px;
-      align-items: baseline;
-      color: #334155;
-      font-size: 15px;
-      line-height: 1.55;
-    }
-
-    .evidence-card .proof-line b {
-      color: var(--teal);
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .industry {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      padding: 24px;
-    }
-
-    .industry-card {
-      min-height: 174px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: #fff;
-      padding: 18px;
-    }
-
-    .industry-card b {
-      display: block;
-      color: var(--teal);
-      font-size: 18px;
-      margin-bottom: 8px;
-    }
-
-    .industry-card p {
-      margin: 0;
+      margin-bottom: 14px;
+      font-size: 13px;
       color: var(--muted);
-      font-size: 15px;
-      line-height: 1.62;
     }
 
-    .checklist {
-      margin: 28px 0;
-      padding: 0;
-      list-style: none;
-      display: grid;
-      gap: 12px;
+    .article-meta-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #94a3b8;
     }
 
-    .checklist li {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 15px;
-      padding: 16px 18px;
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
-      font-size: 17px;
-    }
-
-    .checklist b {
-      color: var(--teal);
-    }
-
-    .verify-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin: 28px 0;
-    }
-
-    .verify-card {
-      background: var(--paper);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-      padding: 18px;
-    }
-
-    .verify-card.wide {
-      grid-column: 1 / -1;
-    }
-
-    .verify-card .kicker {
-      color: var(--blue);
-      font-size: 14px;
-      font-weight: 900;
-      margin-bottom: 8px;
-    }
-
-    .verify-card h4 {
+    .article-title {
       margin: 0 0 12px;
-      color: var(--ink);
-      font-size: 21px;
+      font-size: 24px;
+      font-weight: 700;
       line-height: 1.3;
+      color: var(--ink);
+      transition: color 200ms ease;
     }
 
-    .verify-card dl {
-      margin: 0;
-      display: grid;
-      gap: 10px;
-    }
-
-    .verify-card dt {
-      color: var(--teal);
-      font-size: 15px;
-      font-weight: 900;
-    }
-
-    .verify-card dd {
-      margin: 2px 0 0;
+    .article-desc {
+      margin: 0 0 20px;
       color: #475569;
-      font-size: 15px;
-      line-height: 1.58;
-    }
-
-    .mini-summary {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin: 28px 0;
-    }
-
-    .mini-summary div {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: #fff;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .mini-summary b {
-      display: block;
-      color: var(--amber);
-      font-size: 18px;
-      margin-bottom: 6px;
-    }
-
-    .mini-summary span {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .chat-flow {
-      display: grid;
-      gap: 12px;
-      margin: 24px 0 30px;
-    }
-
-    .chat-line {
-      display: grid;
-      grid-template-columns: 86px minmax(0, 1fr);
-      gap: 12px;
-      align-items: start;
-    }
-
-    .chat-line b {
-      border-radius: 999px;
-      padding: 6px 10px;
-      text-align: center;
-      font-size: 14px;
-      color: #fff;
-      background: var(--blue);
-    }
-
-    .chat-line.agent b {
-      background: var(--teal);
-    }
-
-    .chat-line span {
-      display: block;
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px 16px;
-      color: #334155;
       font-size: 16px;
-      line-height: 1.62;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+      line-height: 1.65;
     }
 
-    .refs {
+    .article-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .article-tags span {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    /* ── Footer ───────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      padding: 32px 28px;
+      color: #94a3b8;
+      font-size: 14px;
       border-top: 1px solid var(--line);
-      padding-top: 28px;
-      color: var(--muted);
-      font-size: 15px;
     }
 
-    .refs p {
-      font-size: 15px;
-      margin: 10px 0;
-    }
-
-    code {
-      background: #eef2f7;
-      border-radius: 6px;
-      padding: 2px 6px;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      font-size: 0.92em;
-    }
-
-    @media (max-width: 860px) {
-      .hero {
-        min-height: 560px;
-      }
-
-      .hero::before {
-        background-image:
-          linear-gradient(180deg, rgba(247, 248, 244, 0.98) 0%, rgba(247, 248, 244, 0.9) 56%, rgba(247, 248, 244, 0.35) 100%),
-          url("./agent-boundary-visuals/cover-background-ai-engineering.png");
-        background-position: center right;
-      }
-
-      .subtitle {
-        font-size: 20px;
-      }
-
-      .hero-inner {
-        padding: 84px 22px 76px;
-      }
-
-      .two-col,
-      .process-row,
-      .module-grid,
-      .boundary-grid,
-      .flow,
-      .industry,
-      .toc-links {
-        grid-template-columns: 1fr;
-      }
-
-      .toc-head {
-        display: block;
-      }
-
-      .toc-head strong {
-        display: block;
-        margin-top: 4px;
-      }
-
-      .arrow,
-      .flow-step::after {
-        display: none;
-      }
-
-      .evidence-row {
-        grid-template-columns: 1fr;
-      }
-
-      .evidence.compact {
-        grid-template-columns: 1fr;
-      }
-
-      .verify-grid,
-      .mini-summary,
-      .chat-line {
-        grid-template-columns: 1fr;
-      }
-
-      .verify-card.wide {
-        grid-column: auto;
-      }
+    /* ── Responsive ───────────────────────────────────── */
+    @media (max-width: 640px) {
+      .hero-inner { padding: 64px 20px 56px; }
+      .articles { padding: 40px 20px 72px; }
+      .article-card { padding: 28px 24px; }
+      .article-title { font-size: 20px; }
     }
   </style>
 </head>
 <body>
   <header class="hero">
     <div class="hero-inner">
-      <h1>复杂工程里的 AI Agent：如何解决验证难题</h1>
-      <p class="subtitle">
-        AI 写代码越来越快，但复杂工程真正卡住的地方往往不是“写不出来”，而是“怎么证明它写对了”。
+      <div class="hero-avatar">Z</div>
+      <h1 class="hero-name">zixuan</h1>
+      <p class="hero-desc">复杂系统工程实践，AI 辅助开发，音视频采集架构。</p>
+    </div>
+  </header>
+
+  <main class="articles">
+    <p class="articles-heading">Articles</p>
+
+    <a class="article-card" href="./ai-agent-verification.html">
+      <div class="article-meta">
+        <span>2025 年 6 月</span>
+        <span class="article-meta-dot"></span>
+        <span>复杂工程</span>
+      </div>
+      <h2 class="article-title">复杂工程里的 AI Agent：如何解决验证难题</h2>
+      <p class="article-desc">
+        AI 写代码越来越快，但复杂工程真正卡住的地方往往不是"写不出来"，而是"怎么证明它写对了"。
       </p>
-      <div class="hero-tags">
+      <div class="article-tags">
         <span>复杂工程</span>
         <span>验证拆层</span>
         <span>替身环境</span>
         <span>证据闭环</span>
       </div>
-    </div>
-  </header>
+    </a>
 
-  <main>
-    <nav class="toc" aria-label="文章目录">
-      <div class="toc-head">
-        <span>目录</span>
-        <strong>从验证困境，到证据闭环</strong>
+    <a class="article-card" href="./ai-agent-testing-practice-blog.html">
+      <div class="article-meta">
+        <span>2025 年 6 月</span>
+        <span class="article-meta-dot"></span>
+        <span>测试架构</span>
       </div>
-      <div class="toc-links">
-        <a href="#why-hard">1. 验证为什么难</a>
-        <a href="#layered-evidence">2. 逐层交付证据</a>
-        <a href="#verification-assets">3. 拆成可交付资产</a>
-        <a href="#agent-task-loop">4. 改写成实现 + 证据</a>
-        <a href="#streaming-case">5. 流式能力真实场景</a>
-        <a href="#evidence-engineering">6. 证据工程化</a>
-        <a href="#conclusion">结尾. 验证能力是地基</a>
+      <h2 class="article-title">如何设计测试 Agent：Harness 自测体系的架构方法</h2>
+      <p class="article-desc">
+        如何在 Harness 自测体系里驱动真实系统、采集证据、稳定评估，并输出可复查报告。
+      </p>
+      <div class="article-tags">
+        <span>Harness 自测</span>
+        <span>测试 Agent</span>
+        <span>证据闭环</span>
+        <span>音视频验证</span>
       </div>
-    </nav>
-
-    <article>
-      <section>
-        <p class="lead">
-          过去我们讨论 AI Agent，容易把重点放在“它能不能写代码”。但真正进入复杂工程后，我发现更关键的问题是：<strong>它写完以后，我们怎么证明这件事真的可用？</strong>
-        </p>
-        <p>
-          这篇文章的主角不是某套工作流，也不是某个工具，而是“验证”。因为 Agent 最大的价值，往往不是一次性写出完美代码，而是在失败、修复、再验证之间快速循环。问题在于，复杂环境下验证本身很难：真实依赖跑不起来，状态难复现，结果不可观测，简单测试又覆盖不了关键风险。
-        </p>
-        <div class="note">
-          <strong>本文的核心问题：</strong>当 AI Agent 遇到“无法完整验证”的复杂任务时，我们怎样把它拆成可证明、可反馈、可收敛的证据链？
-        </div>
-      </section>
-
-      <section id="why-hard">
-        <h2>1. AI Agent 的验证为什么难</h2>
-        <p>
-          简单任务的验证通常很直接：跑单测、看输出、比对截图。但复杂工程不一样。一个新增能力可能要经过多个模块、多个调用方、多个运行状态，还可能依赖真实设备、外部服务、权限、数据流或时序行为。
-        </p>
-        <p>
-          这时，Agent 写代码不是最难的；最难的是证明它没有在关键路径上埋下隐患。
-        </p>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>AI Agent 的验证为什么难？</strong>
-            <span>难点不在“写”，而在“证明”</span>
-          </div>
-          <img src="./agent-boundary-visuals/10-verification-gap-map.svg" alt="AI Agent 验证困难地图" />
-        </div>
-
-        <p>
-          我把验证难题分成四类：环境不可得、状态不可复现、结果不可观测、责任不可证明。只要其中一个存在，Agent 就很容易停在“理论上可行”。而“理论上可行”在工程里不是完成，只是一个假设。
-        </p>
-      </section>
-
-      <section id="layered-evidence">
-        <h2>2. 第一步：不要追求一次性完整验证</h2>
-        <p>
-          很多验证困境来自一个错误期待：希望 Agent 一次性跑通真实环境。这个期待在复杂任务里经常不现实。真实环境可能需要硬件、权限、账号、线上配置、历史数据或复杂外部依赖，而 Agent 往往只能接触到其中一部分。
-        </p>
-        <p>
-          所以这里的“拆层”，不是为了讲测试理论，而是为了给 Agent 一个可执行的推进顺序：不要让它空口判断“能不能用”，而是要求它在当前可达环境里先交付一层证据。
-        </p>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>不要问“能不能用”，要让 Agent 逐层交证据</strong>
-            <span>先拿低层事实，再逐步逼近真实环境</span>
-          </div>
-          <img src="./agent-boundary-visuals/06-validation-pyramid.svg" alt="Agent 逐层交付证据" />
-        </div>
-
-        <p>
-          对人来说，拆层是一种排查顺序；对 Agent 来说，它还会限制猜测空间。你不是听它说“我觉得可以”，而是让它拿出命令输出、fake 数据、最小链路脚本、trace 字段和失败判断口径。
-        </p>
-        <p>
-          这一步最重要的心态变化是：验证不是一个大开关，而是一串可以回喂给 Agent 的证据。证据越具体，Agent 下一轮越像在修一个已定位的问题，而不是重新生成一版看起来合理的代码。
-        </p>
-      </section>
-
-      <section id="verification-assets">
-        <h2>3. 第二步：把“不可验证”拆成 Agent 可交付的资产</h2>
-        <p>
-          “不可验证”很多时候不是完全不能验证，而是缺少能把验证继续往前推的东西。真实设备、真实账号、真实数据流暂时不可得时，如果直接问 Agent “这个能不能证明”，它很容易给出一个看起来合理、但无法落地的判断。
-        </p>
-        <p>
-          更有效的问法是：现在这个环境里，Agent 能先交付哪些资产，让下一轮验证少一点不确定性？这样任务就从“证明最终正确”，变成“先生产可复用的证据材料”。
-        </p>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>把“不可验证”拆成可交付资产</strong>
-            <span>图里是资产类型；下面看怎么要求 Agent 交付</span>
-          </div>
-          <img src="./agent-boundary-visuals/07-harness-validation-layers.svg" alt="复杂环境下验证拆层" />
-        </div>
-
-        <h3>这张图不是四种测试，而是四种交付物</h3>
-        <p>
-          可编译不是为了证明业务正确，而是证明改动真的进入了工程系统；可替身不是为了“假装通过”，而是把不可控依赖变成可控输入；可链路不是多写一个单测，而是把跨模块路径压缩成一个可复跑的 probe；可观测也不是最后补几行日志，而是给真实环境失败预留回传入口。
-        </p>
-        <p>
-          判断一项资产有没有价值，只看一个问题：失败发生时，它能不能减少下一轮猜测？如果一个 build 输出能告诉 Agent 类型映射断在哪里，一个 fake source 能稳定复现边界输入，一个 probe 能说明数据卡在哪个节点，一个 trace id 能把真实失败串起来，它就是有用资产。
-        </p>
-
-        <h3>让 Agent 交付资产，要把任务说成“产物规格”</h3>
-        <p>
-          不要让 Agent 自己猜“验证到什么程度算够”。你要把验证要求写成产物规格：资产叫什么、放在哪里、怎么运行、预期产出什么证据、失败时能归因到哪几类问题。这样它交付的就不是一段自信描述，而是一组可以被人或 CI 继续使用的东西。
-        </p>
-
-        <div class="chat-flow">
-          <div class="chat-line">
-            <b>少说</b>
-            <span>“帮我验证这个功能。”这句话会让 Agent 在跑测试、写解释、猜真实环境之间摇摆。</span>
-          </div>
-          <div class="chat-line agent">
-            <b>要说</b>
-            <span>“先列出当前不可验证的依赖和路径；每个风险至少交付一个验证资产，包括运行命令、fake 或 probe、预期证据、失败归因口径。业务代码可以后做，证据资产要先能复跑。”</span>
-          </div>
-        </div>
-
-        <div class="note">
-          <strong>关键变化：</strong>
-          我们不是要求 Agent 一次性跨过真实环境，而是要求它先把“未来可以验证”的路铺出来。资产交付得越清楚，后面接入真实环境时就越像换参数、收证据，而不是重新开始猜。
-        </div>
-      </section>
-
-      <section id="agent-task-loop">
-        <h2>4. 第三步：操作 Agent 时，把任务改写成“实现 + 证据”</h2>
-        <p>
-          真正改变效果的，不是让 Agent 多写几行代码，而是改变我们给任务的方式。不要只说“实现这个功能”，而要说清楚“实现以后用什么证明它是对的”。
-        </p>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>操作 Agent 的关键循环</strong>
-            <span>每一轮都带着证据返回</span>
-          </div>
-          <img src="./agent-boundary-visuals/08-agent-operation-loop.svg" alt="操作 Agent 的关键循环" />
-        </div>
-
-        <h3>第一轮：让 Agent 先列验证风险，不写代码</h3>
-        <p>
-          让它回答：哪些路径本地能验证？哪些路径需要替身？哪些路径必须等真实环境？哪些行为需要额外日志？这一步会把“验证盲区”提前暴露出来。
-        </p>
-
-        <h3>第二轮：把每个风险改写成证据目标</h3>
-        <p>
-          例如“流式订阅可能断连异常”不要只写成风险，而要写成证据目标：断连后只清理订阅资源，底层会话继续存在，并且日志里能看到清理动作。
-        </p>
-
-        <h3>第三轮：让 Agent 小步实现，每步跑最近验证</h3>
-        <p>
-          大任务一次改完，失败时很难定位。更好的方式是：接口定义、类型映射、生命周期、最小链路、观测点分步做。每一步只扩大一点点验证范围。
-        </p>
-
-        <h3>第四轮：把失败日志喂回 Agent，而不是让它重新猜</h3>
-        <p>
-          Agent 最容易浪费时间的地方，是没有证据时反复猜。每次验证失败，都把命令、日志、diff、预期行为一起给它。让它基于证据修复，而不是重新生成一版看起来合理的代码。
-        </p>
-      </section>
-
-      <section id="streaming-case">
-        <h2>5. 一个真实场景：如何打破“流式能力”的验证困难</h2>
-        <p>
-          举一个抽象后的真实场景：给既有服务新增一条流式能力，让新调用方持续接收数据，同时旧调用方不受影响。这个需求看起来像“新增一个接口”，但真正麻烦的是验证。
-        </p>
-        <p>
-          普通接口很好验证：发一个请求，拿一个响应，断言字段对不对。流式能力不一样，它要验证的是一段生命周期：订阅建立、首包到达、持续推送、断连清理、资源保持、真实环境下不积压。
-        </p>
-
-        <div class="mini-summary">
-          <div>
-            <b>先造验证工具</b>
-            <span>让 Agent 先交付 probe、fake 数据源和断言脚本。</span>
-          </div>
-          <div>
-            <b>同一工具双模式</b>
-            <span>fake 模式做本地证据，real 模式接真实环境。</span>
-          </div>
-          <div>
-            <b>证据回喂 Agent</b>
-            <span>失败时带日志、指标和 trace 回来定位。</span>
-          </div>
-        </div>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>从让 Agent 验证，到让 Agent 造验证工具</strong>
-            <span>第一轮先产出工具，而不是直接碰真实环境</span>
-          </div>
-          <img src="./agent-boundary-visuals/14-agent-builds-verification-tools.svg" alt="让 Agent 先造验证工具" />
-        </div>
-
-        <p>
-          这类场景如果直接让 Agent “实现并验证”，它大概率会跑到两个极端：要么只证明接口能编译，要么试图完整启动真实环境然后卡住。更稳的做法是：先让 Agent 把验证工具造出来，再让工具去产生证据。
-        </p>
-
-        <div class="chat-flow">
-          <div class="chat-line">
-            <b>不要</b>
-            <span>“帮我验证这个流式能力有没有问题。”这句话太模糊，Agent 不知道该造数据、跑脚本、看日志，还是猜业务逻辑。</span>
-          </div>
-          <div class="chat-line agent">
-            <b>要</b>
-            <span>“先不要改业务代码。请先设计并实现一个 <code>stream_probe</code> 测试客户端，支持 fake/real 两种模式，输出 JSONL 指标。指标至少包含 <code>trace_id</code>、<code>first_packet_ms</code>、<code>packet_count</code>、<code>seq_gap</code>、<code>queue_depth</code>、<code>disconnect_reason</code>、<code>active_subscription_count</code>。”</span>
-          </div>
-        </div>
-
-        <div class="note">
-          <strong>这一步的本质：</strong>
-          Agent 不是先去“验证真实环境”，而是先把验证动作工程化。它交付的是可运行的工具、可重复的脚本、可观测的字段和明确的通过标准；真实环境只负责产出事实。
-        </div>
-
-        <div class="verify-grid">
-          <div class="verify-card">
-            <div class="kicker">本地证据 1</div>
-            <h4>契约先行</h4>
-            <dl>
-              <div>
-                <dt>验什么</dt>
-                <dd>新增接口是否可生成，错误码是否完整，旧调用路径是否不受影响。</dd>
-              </div>
-              <div>
-                <dt>怎么验</dt>
-                <dd>让 Agent 补契约测试和旧路径回归，不碰真实数据源。</dd>
-              </div>
-              <div>
-                <dt>通过标准</dt>
-                <dd>旧接口仍可用，新接口可生成，失败场景能被明确表达。</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div class="verify-card">
-            <div class="kicker">本地证据 2</div>
-            <h4>fake 数据源</h4>
-            <dl>
-              <div>
-                <dt>验什么</dt>
-                <dd>字段映射、序号、时间戳、空包、异常包、超大包。</dd>
-              </div>
-              <div>
-                <dt>怎么验</dt>
-                <dd>让 Agent 构造固定数据源，并挂到 <code>stream_probe --mode fake</code>。</dd>
-              </div>
-              <div>
-                <dt>通过标准</dt>
-                <dd>每个包都能被正确转换，顺序递增，异常可被识别。</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div class="verify-card">
-            <div class="kicker">链路证据</div>
-            <h4>最小订阅闭环</h4>
-            <dl>
-              <div>
-                <dt>验什么</dt>
-                <dd>订阅能建立，首包能到，连续包顺序稳定。</dd>
-              </div>
-              <div>
-                <dt>怎么验</dt>
-                <dd><code>stream_probe --mode fake</code> 驱动 3 条数据，测试客户端必须收到 3 条。</dd>
-              </div>
-              <div>
-                <dt>通过标准</dt>
-                <dd>首包时间可记录，包序号可断言，结束时触发清理。</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div class="verify-card">
-            <div class="kicker">生命周期证据</div>
-            <h4>断连清理</h4>
-            <dl>
-              <div>
-                <dt>验什么</dt>
-                <dd>客户端断开后，清理正确资源，保留正确资源。</dd>
-              </div>
-              <div>
-                <dt>怎么验</dt>
-                <dd>模拟取消订阅、异常退出、重复订阅。</dd>
-              </div>
-              <div>
-                <dt>通过标准</dt>
-                <dd>订阅对象被移除，底层任务不被误销毁，重复订阅无脏数据。</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-
-        <h3>真实环境集成验证怎么做</h3>
-        <p>
-          本地证据只能证明“逻辑大概率没错”，不能替代真实环境。这里最容易断掉的是通路：虚拟环境里跑过的东西，到了真实环境不知道怎么接；真实环境里失败了，又不知道怎么回到 Agent 那里修。
-        </p>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>同一套工具，怎么从虚拟环境走到真实环境？</strong>
-            <span>改的是运行参数，不是验证思路</span>
-          </div>
-          <img src="./agent-boundary-visuals/13-agent-virtual-to-real-path.svg" alt="Agent 从虚拟环境到真实环境的验证通路" />
-        </div>
-
-        <p>
-          这里不需要把真实环境讲成另一套流程。更自然的做法是：本地那一轮产出的验证器不要丢，真机联调时继续用它，只把 fake 数据源换成真实设备，把服务地址、设备 id 和会话参数补进去。这样失败时拿到的还是同一种证据，而不是一堆新的、无法比较的日志。
-        </p>
-        <div class="verify-grid">
-          <div class="verify-card">
-            <div class="kicker">虚拟环境</div>
-            <h4>先把验证器做出来</h4>
-            <dl>
-              <div>
-                <dt>做什么</dt>
-                <dd>准备 fake 数据源、契约测试、最小订阅闭环、断连清理用例，以及 <code>stream_probe</code> 的本地模式。</dd>
-              </div>
-              <div>
-                <dt>留下什么</dt>
-                <dd>测试客户端、通过标准、观测字段清单、已知风险清单和结构化输出样例。</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div class="verify-card">
-            <div class="kicker">真实环境</div>
-            <h4>复用验证器做联调</h4>
-            <dl>
-              <div>
-                <dt>怎么接</dt>
-                <dd>不重写工具，只替换服务地址、设备 id、会话配置和运行时长，接到真实设备上跑。</dd>
-              </div>
-              <div>
-                <dt>看什么</dt>
-                <dd>真实订阅记录、首包耗时、包数量、序号缺口、队列长度、断连原因、资源计数。</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div class="verify-card wide">
-            <div class="kicker">失败回传</div>
-            <h4>用同一种证据定位</h4>
-            <dl>
-              <div>
-                <dt>少说</dt>
-                <dd>不要只说“真实环境不通”，这对 Agent 几乎没有帮助。</dd>
-              </div>
-              <div>
-                <dt>多给</dt>
-                <dd>把 trace id、联调脚本、失败时间点、关键日志、指标截图或导出数据回喂给 Agent，让它判断失败发生在契约、数据、链路、断连还是真实依赖。</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-
-        <p>
-          所以真实环境验证不是上线后观察一下，而是准备一套能重复执行的联调脚本和指标看板。
-        </p>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>从本地可证，到真实环境可验</strong>
-            <span>真实集成验证也要有脚本和指标</span>
-          </div>
-          <img src="./agent-boundary-visuals/12-streaming-real-env-bridge.svg" alt="本地验证到真实环境验证" />
-        </div>
-
-        <div class="verify-grid">
-          <div class="verify-card wide">
-            <div class="kicker">真实环境关卡</div>
-            <h4>用测试客户端和指标验证系统真的能跑</h4>
-            <dl>
-              <div>
-                <dt>准备什么</dt>
-                <dd>一个可重复执行的测试客户端；每次订阅带 trace id；服务端记录订阅 id、首包时间、队列长度、推送失败次数、断连原因、资源计数。</dd>
-              </div>
-              <div>
-                <dt>跑哪些场景</dt>
-                <dd>正常订阅一段时间、客户端主动断开、客户端异常退出、快速重连、多客户端并发、真实数据源抖动。</dd>
-              </div>
-              <div>
-                <dt>看哪些指标</dt>
-                <dd>首包耗时、收到包数量、序号缺口、重复包、队列积压、推送失败、断连后资源数是否回落。</dd>
-              </div>
-              <div>
-                <dt>怎么判定通过</dt>
-                <dd>关键指标在预设阈值内；断连后没有资源泄漏；旧调用路径无回归；出现失败时能用 trace id 定位到具体阶段。</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>收敛：把 STREAM_CALLBACK 变成可定位的证据链</strong>
-            <span>失败时能说清楚卡在哪个节点</span>
-          </div>
-          <img src="./agent-boundary-visuals/15-rpc-callback-evidence-chain.svg" alt="STREAM_CALLBACK 可定位证据链" />
-        </div>
-
-        <p>
-          回到这个抽象场景，最后真正收敛的不是一句“<code>SubscribeStream</code> 已实现”，而是一条可复跑、可定位、可回传给 Agent 的证据链。
-        </p>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>这个场景里，每段链路要交付什么证据？</strong>
-            <span>每个风险只问三件事：卡点、交付、信号</span>
-          </div>
-          <div class="evidence compact">
-            <div class="evidence-card">
-              <strong>RPC streaming 能不能跑</strong>
-              <div class="proof-line"><b>交付</b><span>server-streaming 最小 spike</span></div>
-              <div class="proof-line"><b>信号</b><span>客户端稳定收到 3 条 demo packet</span></div>
-            </div>
-            <div class="evidence-card">
-              <strong>proto 契约有没有断</strong>
-              <div class="proof-line"><b>交付</b><span><code>stream_service.proto</code> 生成和构建记录</span></div>
-              <div class="proof-line"><b>信号</b><span>关键字段有映射测试</span></div>
-            </div>
-            <div class="evidence-card">
-              <strong>会话是不是 STREAM_CALLBACK</strong>
-              <div class="proof-line"><b>交付</b><span><code>stream_probe</code> + <code>evidence.jsonl</code></span></div>
-              <div class="proof-line"><b>信号</b><span>session_id、protocol、trace_id 可查</span></div>
-            </div>
-            <div class="evidence-card">
-              <strong>订阅有没有挂到会话</strong>
-              <div class="proof-line"><b>交付</b><span>mock / spy / 结构化日志</span></div>
-              <div class="proof-line"><b>信号</b><span>sink 绑定到正确的 <code>StreamSession</code></span></div>
-            </div>
-            <div class="evidence-card">
-              <strong>packet 有没有进入 stream</strong>
-              <div class="proof-line"><b>交付</b><span>fake packet source 驱动 <code>StreamSink</code></span></div>
-              <div class="proof-line"><b>信号</b><span>客户端收到固定数量 <code>StreamPacket</code></span></div>
-            </div>
-            <div class="evidence-card">
-              <strong>断连后资源有没有回落</strong>
-              <div class="proof-line"><b>交付</b><span>cancel / destroy 用例</span></div>
-              <div class="proof-line"><b>信号</b><span>EOF、sink 数量、active_subscription_count 回到预期</span></div>
-            </div>
-            <div class="evidence-card">
-              <strong>旧通道有没有被破坏</strong>
-              <div class="proof-line"><b>交付</b><span>旧 SDK / HTTP 回归脚本</span></div>
-              <div class="proof-line"><b>信号</b><span>枚举、会话、暂停、恢复、销毁仍可用</span></div>
-            </div>
-          </div>
-        </div>
-
-        <p>
-          这张表不用读成测试清单，而要读成给 Agent 的工作单：每个风险都必须落到一个可运行的交付物和一个可观察的通过信号。真实环境失败时，我们就能说“卡在 sink 到 stream 这一段”，而不是只说“流式能力不通”。
-        </p>
-      </section>
-
-      <section id="evidence-engineering">
-        <h2>6. 展望：成熟的 Agent 工程化会变成“证据工程”</h2>
-        <p>
-          我不太想把这一节写成“谁家工具怎么做”。更准确地说，很多实践都在指向同一个方向：未来成熟的 Agent 工程化，不只是更强的模型，而是更强的验证系统。
-        </p>
-
-        <div class="figure">
-          <div class="figure-title">
-            <strong>下一步：把验证能力产品化</strong>
-            <span>从人提醒 Agent，到系统要求 Agent 提交证据</span>
-          </div>
-          <img src="./agent-boundary-visuals/09-future-evolution.svg" alt="Agent 工程化演进方向" />
-        </div>
-
-        <p>
-          项目级指令会告诉 Agent 要遵守什么规则；沙箱和权限会限制它能做什么；验证门禁会要求它提交可观察证据；安全审查会关注依赖、配置、提示注入和生成测试的可信度；指标系统会帮助团队判断 AI 到底是减少了返工，还是只是更快地产生了更多不确定改动。
-        </p>
-        <p>
-          也就是说，Agent 工程化的终点不只是“自动写代码”，而是“自动围绕代码建立证据”。
-        </p>
-      </section>
-
-      <section id="conclusion">
-        <h2>结尾：验证能力，才是 Agent 落地的地基</h2>
-        <p>
-          Agent 写代码的能力会继续变强，但复杂工程不会因此自动变简单。真正决定它能不能进入团队日常的，是我们有没有办法证明它写出来的东西是可靠的。
-        </p>
-        <div class="note">
-          <strong>把“让 AI 写”升级成“让 AI 证明”。这就是验证工程真正要解决的问题。</strong>
-        </div>
-      </section>
-
-      <section class="refs">
-        <h2>参考资料</h2>
-        <p><a href="https://developers.openai.com/codex/guides/agents-md">OpenAI Codex AGENTS.md</a>：项目级指令和目录级覆盖规则。</p>
-        <p><a href="https://code.claude.com/docs/en/best-practices">Claude Code Best Practices</a>：探索、计划、实现和可运行验证的 Agent 实践。</p>
-      </section>
-    </article>
+    </a>
   </main>
+
+  <footer class="footer">
+    &copy; 2025 zixuan
+  </footer>
 </body>
 </html>

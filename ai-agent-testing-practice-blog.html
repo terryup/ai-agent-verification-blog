@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>如何设计测试 Agent：Harness 自测体系的架构方法</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --paper: #ffffff;
+      --ink: #17202a;
+      --muted: #667085;
+      --line: #e4e7ec;
+      --brand: #2454d6;
+      --brand-soft: #eef3ff;
+      --green: #07825f;
+      --amber: #b76e00;
+      --red: #c83232;
+      --code: #101828;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.72;
+    }
+    .doc-shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 32px 24px 72px;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .side-toc {
+      position: sticky;
+      top: 24px;
+      max-height: calc(100vh - 48px);
+      overflow: auto;
+      padding: 8px 0 24px;
+    }
+    .toc-card {
+      position: relative;
+      border: none;
+      background: transparent;
+      border-radius: 0;
+      padding: 18px 8px 18px 18px;
+      box-shadow: none;
+      animation: tocEnter 420ms ease-out both;
+    }
+    .toc-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 22px;
+      bottom: 22px;
+      width: 2px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(36, 84, 214, 0.95), rgba(7, 130, 95, 0.75), rgba(183, 110, 0, 0.45));
+    }
+    .toc-kicker {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    .toc-title {
+      margin: 0 0 14px;
+      font-size: 18px;
+      line-height: 1.35;
+      font-weight: 800;
+      color: var(--ink);
+    }
+    .page {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+    }
+    section {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    .hero {
+      min-height: 680px;
+      position: relative;
+      overflow: hidden;
+      background: #f7efe2;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid rgba(16, 24, 40, 0.08);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(90deg, rgba(246, 247, 249, 0.98) 0%, rgba(246, 247, 249, 0.88) 36%, rgba(246, 247, 249, 0.18) 68%),
+        url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.01);
+    }
+    .hero-inner {
+      position: relative;
+      max-width: 1180px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 116px 28px 104px;
+    }
+    section {
+      margin-top: 18px;
+      padding: 32px 36px;
+    }
+    h1 {
+      max-width: 760px;
+      margin: 0 0 24px;
+      font-size: clamp(42px, 7vw, 82px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+    h2 {
+      margin: 0 0 16px;
+      font-size: 26px;
+      line-height: 1.32;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 28px 0 10px;
+      font-size: 19px;
+      letter-spacing: 0;
+    }
+    p { margin: 12px 0; }
+    strong { color: #101828; }
+    .subtitle {
+      max-width: 700px;
+      color: #314155;
+      font-size: 25px;
+      line-height: 1.58;
+      margin: 0 0 34px;
+    }
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .hero-tags span {
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(15, 23, 42, 0.1);
+      border-radius: 999px;
+      padding: 9px 15px;
+      color: #334155;
+      font-size: 15px;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+    .byline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 28px;
+      color: #475569;
+      font-size: 15px;
+    }
+    .byline-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2454d6, #07825f);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .byline-name {
+      font-weight: 600;
+      color: #1e293b;
+    }
+    .byline-sep {
+      color: #94a3b8;
+    }
+    .byline-date {
+      color: #64748b;
+    }
+    .lead {
+      font-size: 17px;
+      color: #344054;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      background: #fbfcfe;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .toc {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .toc a {
+      position: relative;
+      color: #344054;
+      text-decoration: none;
+      border: 1px solid transparent;
+      padding: 8px 10px 8px 16px;
+      border-radius: 6px;
+      background: transparent;
+      font-size: 13px;
+      line-height: 1.35;
+      transition: transform 180ms ease, color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+    }
+    .toc a::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 50%;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #c7d7ff;
+      transform: translateY(-50%);
+      transition: background-color 180ms ease, box-shadow 180ms ease;
+    }
+    .toc a:hover {
+      color: var(--brand);
+      background: var(--brand-soft);
+      border-color: #c7d7ff;
+      transform: translateX(4px);
+    }
+    .toc a:hover::before {
+      background: var(--brand);
+      box-shadow: 0 0 0 4px rgba(36, 84, 214, 0.1);
+    }
+    @keyframes tocEnter {
+      from { transform: translateX(-10px); }
+      to { transform: translateX(0); }
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      background: #fbfcfe;
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 17px;
+    }
+    .svg-panel {
+      border: 1px solid #d6dce8;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 8px;
+      margin: 22px 0;
+      overflow-x: auto;
+      box-shadow: 0 18px 38px rgba(16, 24, 40, 0.08);
+    }
+    .svg-diagram {
+      display: block;
+      width: 100%;
+      min-width: 920px;
+      height: auto;
+    }
+    .svg-title {
+      font: 700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: #111827;
+    }
+    .svg-subtitle {
+      font: 500 13px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: #667085;
+    }
+    .svg-label {
+      font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: #17202a;
+    }
+    .svg-small {
+      font: 500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: #667085;
+    }
+    .svg-chip {
+      font: 700 11px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: #344054;
+    }
+    .svg-lane {
+      font: 700 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: #475467;
+      letter-spacing: 0;
+    }
+    .visual-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .visual-card {
+      border: 1px solid #d6dce8;
+      background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 150px;
+    }
+    .visual-card svg {
+      display: block;
+      width: 54px;
+      height: 54px;
+      margin-bottom: 10px;
+    }
+    .visual-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+    .visual-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .mini-flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 18px 0;
+      align-items: stretch;
+    }
+    .mini-step {
+      border: 1px solid #d6dce8;
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px;
+      position: relative;
+      min-height: 108px;
+    }
+    .mini-step::after {
+      content: "";
+      position: absolute;
+      top: 42px;
+      right: -12px;
+      width: 20px;
+      height: 2px;
+      background: #9db7f4;
+    }
+    .mini-step:last-child::after { display: none; }
+    .mini-step b {
+      display: block;
+      margin-bottom: 6px;
+      color: #17202a;
+    }
+    .mini-step span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f2f4f7;
+      font-weight: 700;
+    }
+    code {
+      background: #eef2f6;
+      color: var(--code);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+    pre {
+      overflow: auto;
+      background: #101828;
+      color: #f2f4f7;
+      border-radius: 6px;
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+    .callout {
+      border-left: 4px solid var(--brand);
+      background: var(--brand-soft);
+      padding: 14px 16px;
+      margin: 18px 0;
+    }
+    .ok {
+      border-left-color: var(--green);
+      background: #edf8f4;
+    }
+    .warn {
+      border-left-color: var(--amber);
+      background: #fff7e8;
+    }
+    .risk {
+      border-left-color: var(--red);
+      background: #fff0f0;
+    }
+    ul, ol { padding-left: 22px; }
+    li { margin: 6px 0; }
+    .tag-ok { color: var(--green); font-weight: 700; }
+    .tag-warn { color: var(--amber); font-weight: 700; }
+    .tag-risk { color: var(--red); font-weight: 700; }
+    @media (max-width: 760px) {
+      .doc-shell {
+        grid-template-columns: 1fr;
+        padding: 24px 16px 56px;
+      }
+      .side-toc {
+        position: static;
+        max-height: none;
+      }
+      .hero {
+        min-height: 560px;
+      }
+      .hero::before {
+        background-image:
+          linear-gradient(180deg, rgba(246, 247, 249, 0.98) 0%, rgba(246, 247, 249, 0.9) 56%, rgba(246, 247, 249, 0.35) 100%),
+          url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
+        background-position: center right;
+      }
+      .hero-inner {
+        padding: 84px 22px 76px;
+      }
+      section { padding: 24px; }
+      h1 { font-size: 38px; }
+      .subtitle { font-size: 20px; }
+      .toc, .grid-2, .grid-3, .visual-grid, .mini-flow { grid-template-columns: 1fr; }
+      .mini-step::after { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <h1>测试 Agent 架构方法</h1>
+      <p class="subtitle">
+        如何在 Harness 自测体系里驱动真实系统、采集证据、稳定评估，并输出可复查报告。
+      </p>
+      <div class="hero-tags">
+        <span>Harness 自测</span>
+        <span>测试 Agent</span>
+        <span>证据闭环</span>
+        <span>音视频验证</span>
+      </div>
+      <div class="byline">
+        <div class="byline-avatar">Z</div>
+        <span class="byline-name">zixuan</span>
+        <span class="byline-sep">·</span>
+        <span class="byline-date">2025 年 6 月</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="doc-shell">
+    <aside class="side-toc" aria-label="文章目录">
+      <div class="toc-card">
+        <p class="toc-kicker">TECH SHARE</p>
+        <p class="toc-title">测试 Agent 架构方法</p>
+        <nav class="toc">
+          <a href="#one-line">1. 先定义测试 Agent 的职责</a>
+          <a href="#why">2. 为什么它要放在 Harness 里</a>
+          <a href="#p2p-limit">3. 为什么不直接 P2P 测试</a>
+          <a href="#principles">4. 五条核心设计原则</a>
+          <a href="#architecture">5. 推荐的七层架构</a>
+          <a href="#agent-design">6. Agent 本身怎么设计</a>
+          <a href="#evidence">7. 证据链和判断边界</a>
+          <a href="#av">8. 音视频业务验证如何落地</a>
+          <a href="#harness-map">9. 如何融入当前 Harness 流程</a>
+          <a href="#status">10. 当前能力边界</a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="page">
+    <section id="one-line">
+      <h2>1. 先定义测试 Agent 的职责</h2>
+      <p class="lead">
+        测试 Agent 的核心职责不是“替模型下结论”，而是把一次交付变成可运行、可观察、可复查的验证闭环。
+      </p>
+      <p>
+        在 Harness 项目里，可以把测试 Agent 理解成一个验证编排者。它接收需求、测试意图或回归用例，调用 Harness 暴露的动作工具，驱动真实系统运行，再把控制面结果、媒体证据、本地指标、工具调用记录和最终报告串起来。
+      </p>
+      <div class="visual-grid">
+        <div class="visual-card">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="10" y="12" width="44" height="40" rx="8" fill="#eef4ff" stroke="#9db7f4" />
+            <path d="M22 28h20M22 36h14" stroke="#2454d6" stroke-width="3" stroke-linecap="round" />
+            <circle cx="44" cy="42" r="5" fill="#2454d6" opacity="0.18" />
+          </svg>
+          <h3>开发 Agent</h3>
+          <p>负责实现、修改和说明，把代码交付出来。</p>
+        </div>
+        <div class="visual-card">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="21" fill="#ecfdf5" stroke="#9fd8bf" />
+            <path d="M22 32h20M34 24l8 8-8 8" stroke="#07825f" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <h3>测试 Agent</h3>
+          <p>负责选择场景、调度工具、串起验证闭环。</p>
+        </div>
+        <div class="visual-card">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="12" y="16" width="40" height="34" rx="8" fill="#fff7ed" stroke="#f0c58e" />
+            <path d="M20 28h24M20 36h16" stroke="#b76e00" stroke-width="3" stroke-linecap="round" />
+            <path d="M46 16v34" stroke="#f0c58e" stroke-width="2" />
+          </svg>
+          <h3>本地 Evaluator</h3>
+          <p>负责稳定判断：断言、阈值、评分和候选异常。</p>
+        </div>
+        <div class="visual-card">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="14" y="12" width="36" height="44" rx="9" fill="#f5f0ff" stroke="#c9b8f5" />
+            <circle cx="32" cy="28" r="8" fill="#6941c6" opacity="0.16" />
+            <path d="M24 43h16M28 48h8" stroke="#6941c6" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <h3>诊断 Agent</h3>
+          <p>基于证据解释异常，提出原因假设和下一步建议。</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>角色</th><th>应该负责什么</th><th>设计边界</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>开发 Agent</td>
+            <td>实现需求、修改代码、补充说明</td>
+            <td>交付后的运行证据交给独立 Harness 生成</td>
+          </tr>
+          <tr>
+            <td>测试 Agent / 自测 Agent</td>
+            <td>选择验证场景、调度工具、收集证据、汇总报告</td>
+            <td>不绕过工具直接想象系统状态</td>
+          </tr>
+          <tr>
+            <td>本地 Evaluator</td>
+            <td>执行确定性判断，如断言、阈值、格式、帧率、进程状态</td>
+            <td>负责高信号筛选，不承担复杂语义解释</td>
+          </tr>
+          <tr>
+            <td>诊断 Agent</td>
+            <td>在证据窗口上提出原因假设、调用工具验证、给出排查建议</td>
+            <td>所有结论必须能回到证据和工具调用</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout ok">
+        <strong>一句话：</strong>测试 Agent 应该像一名有工具、有记录、有边界的验证编排者，而不是一个只输出“通过/失败”的聊天入口。
+      </div>
+    </section>
+
+    <section id="why">
+      <h2>2. 为什么它要放在 Harness 里</h2>
+      <p>
+        Agent 协作开发后，最容易缺失的不是代码说明，而是运行态证据。尤其在 capture-service 这类音视频项目里，接口返回成功只能说明控制面可达，不能说明真实采集链路、媒体质量、音频信号、进程稳定性都符合预期。
+      </p>
+      <p>
+        Harness 天然适合承载测试 Agent，因为它连接了三类资源：被测系统的控制面、业务运行时的证据面，以及报告和回归资产的沉淀面。
+      </p>
+      <div class="mini-flow">
+        <div class="mini-step">
+          <b>控制系统</b>
+          <span>通过 HTTP/RPC/GUI 驱动真实 Worker 和业务会话。</span>
+        </div>
+        <div class="mini-step">
+          <b>观察运行</b>
+          <span>拿到响应、流包、帧、音频指标、进程状态。</span>
+        </div>
+        <div class="mini-step">
+          <b>稳定评估</b>
+          <span>先用断言、阈值、评分规则过滤高信号问题。</span>
+        </div>
+        <div class="mini-step">
+          <b>Agent 诊断</b>
+          <span>围绕候选异常调用工具，压缩成可读解释。</span>
+        </div>
+        <div class="mini-step">
+          <b>沉淀资产</b>
+          <span>输出报告、证据索引和可复跑用例。</span>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Harness 能力</th><th>给测试 Agent 带来的价值</th><th>capture-service-harness 示例</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>控制被测系统</td>
+            <td>Agent 可以通过受控工具创建真实会话，而不是只读代码</td>
+            <td>HTTP/RPC 创建、销毁 capture session，枚举设备</td>
+          </tr>
+          <tr>
+            <td>采集运行证据</td>
+            <td>验证结果可以回放和复查</td>
+            <td>RTSP/fMP4、RPC StreamPacket、JPEG 帧、音频指标</td>
+          </tr>
+          <tr>
+            <td>沉淀测试资产</td>
+            <td>同一个场景可以被人、CI 和 Agent 复用</td>
+            <td>Markdown 用例、Runner、HTML 报告</td>
+          </tr>
+          <tr>
+            <td>限制工具边界</td>
+            <td>Agent 的探索范围可控，输出结构稳定</td>
+            <td>frame/video/audio/stream/code tools，`submit_report` schema</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="p2p-limit">
+      <h2>3. 为什么不直接让 Claude Code / Codex 做 P2P 测试</h2>
+      <p class="lead">
+        Claude Code、Codex 这类开发 Agent 可以辅助探索和排查，但不适合作为唯一的 P2P 验证闭环。截止本文发布时，LLM 的不稳定性、上下文漂移和工具执行不确定性仍然无法 100% 解决。
+      </p>
+      <p>
+        这里的 P2P 测试指的是：开发 Agent 直接临时操作被测系统、观察结果、判断通过与否，并把自然语言结论当作交付证据。它在调试阶段很有价值，但作为团队可复用的验证基础设施，会遇到几个明显边界。
+      </p>
+      <div class="visual-grid">
+        <div class="visual-card">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="12" y="16" width="40" height="32" rx="8" fill="#fff7ed" stroke="#f0c58e" />
+            <path d="M22 27h20M22 37h13" stroke="#b76e00" stroke-width="3" stroke-linecap="round" />
+            <path d="M44 12v10M50 17h-10" stroke="#b76e00" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <h3>输出不完全确定</h3>
+          <p>同一目标下，模型的计划、工具选择和判断口径可能随上下文变化。</p>
+        </div>
+        <div class="visual-card">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="22" fill="#eef4ff" stroke="#9db7f4" />
+            <path d="M32 18v15l10 7" stroke="#2454d6" stroke-width="3" fill="none" stroke-linecap="round" />
+          </svg>
+          <h3>运行态链路很长</h3>
+          <p>音视频、进程、网络、时序和设备状态都可能影响一次测试结果。</p>
+        </div>
+        <div class="visual-card">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="13" y="12" width="38" height="42" rx="8" fill="#ecfdf5" stroke="#a6d8c3" />
+            <path d="M22 25h20M22 34h15M22 43h10" stroke="#07825f" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <h3>证据容易丢失</h3>
+          <p>临时观察如果没有统一证据仓，后续 review 很难复查原始事实。</p>
+        </div>
+        <div class="visual-card">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="10" y="16" width="18" height="32" rx="6" fill="#f5f0ff" stroke="#c9b8f5" />
+            <rect x="36" y="16" width="18" height="32" rx="6" fill="#fff5f5" stroke="#f2aaaa" />
+            <path d="M28 32h8" stroke="#6941c6" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <h3>职责边界会混</h3>
+          <p>同一个开发 Agent 自己实现、自己验收，容易缺少独立验证层。</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr><th>方案</th><th>适合做什么</th><th>不适合作为什么</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Claude Code / Codex 直接 P2P</td>
+            <td>探索问题、临时调试、补充上下文、生成候选测试思路</td>
+            <td>最终交付证据、稳定回归门禁、可审计质量结论</td>
+          </tr>
+          <tr>
+            <td>Harness 内测试 Agent</td>
+            <td>调度标准工具、采集证据、本地评估、输出结构化报告</td>
+            <td>承担全部人工判断，或跳过真实系统运行</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <strong>设计结论：</strong>开发 Agent 可以参与测试设计和异常解释，但稳定验证应落到 Harness：用固定工具、固定证据格式、固定 evaluator 和固定报告 schema，把模型的不稳定性隔离在可控边界内。
+      </div>
+    </section>
+
+    <section id="principles">
+      <h2>4. 五条核心设计原则</h2>
+      <div class="svg-panel">
+        <svg class="svg-diagram" viewBox="0 0 1060 360" role="img" aria-label="测试 Agent 五条设计原则图">
+          <defs>
+            <filter id="principleShadow" x="-20%" y="-20%" width="140%" height="150%">
+              <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#101828" flood-opacity="0.11" />
+            </filter>
+            <marker id="principleArrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#2454d6" />
+            </marker>
+          </defs>
+          <rect x="0" y="0" width="1060" height="360" fill="#ffffff" />
+          <rect x="24" y="24" width="1012" height="312" rx="14" fill="#f8fafc" stroke="#d8e0ec" />
+          <text x="52" y="62" class="svg-title">从一次对话到工程闭环</text>
+          <text x="52" y="86" class="svg-subtitle">这五条原则决定测试 Agent 是否可复用、可信、可维护</text>
+
+          <g filter="url(#principleShadow)">
+            <rect x="56" y="128" width="170" height="108" rx="12" fill="#eef4ff" stroke="#b8cdfb" />
+            <circle cx="86" cy="158" r="15" fill="#2454d6" opacity="0.16" />
+            <text x="81" y="164" font-size="16" font-weight="700" fill="#2454d6">1</text>
+            <text x="106" y="153" class="svg-label">先证据</text>
+            <text x="106" y="177" class="svg-small">响应、日志、帧</text>
+            <text x="106" y="197" class="svg-small">先于任何解释</text>
+
+            <rect x="252" y="128" width="170" height="108" rx="12" fill="#fff7ed" stroke="#f0c58e" />
+            <circle cx="282" cy="158" r="15" fill="#b76e00" opacity="0.16" />
+            <text x="277" y="164" font-size="16" font-weight="700" fill="#b76e00">2</text>
+            <text x="302" y="153" class="svg-label">确定性前置</text>
+            <text x="302" y="177" class="svg-small">断言、阈值、评分</text>
+            <text x="302" y="197" class="svg-small">先过滤噪声</text>
+
+            <rect x="448" y="128" width="170" height="108" rx="12" fill="#ecfdf5" stroke="#a6d8c3" />
+            <circle cx="478" cy="158" r="15" fill="#07825f" opacity="0.16" />
+            <text x="473" y="164" font-size="16" font-weight="700" fill="#07825f">3</text>
+            <text x="498" y="153" class="svg-label">工具边界</text>
+            <text x="498" y="177" class="svg-small">schema、权限</text>
+            <text x="498" y="197" class="svg-small">预算和超时</text>
+
+            <rect x="644" y="128" width="170" height="108" rx="12" fill="#f5f0ff" stroke="#c9b8f5" />
+            <circle cx="674" cy="158" r="15" fill="#6941c6" opacity="0.16" />
+            <text x="669" y="164" font-size="16" font-weight="700" fill="#6941c6">4</text>
+            <text x="694" y="153" class="svg-label">报告可追溯</text>
+            <text x="694" y="177" class="svg-small">结论能回到</text>
+            <text x="694" y="197" class="svg-small">证据和工具调用</text>
+
+            <rect x="840" y="128" width="170" height="108" rx="12" fill="#eff8ff" stroke="#a8d6f0" />
+            <circle cx="870" cy="158" r="15" fill="#0b7fab" opacity="0.16" />
+            <text x="865" y="164" font-size="16" font-weight="700" fill="#0b7fab">5</text>
+            <text x="890" y="153" class="svg-label">用例资产化</text>
+            <text x="890" y="177" class="svg-small">高价值场景</text>
+            <text x="890" y="197" class="svg-small">沉淀可复跑</text>
+          </g>
+          <path d="M226 182 H248" stroke="#2454d6" stroke-width="2.4" marker-end="url(#principleArrow)" />
+          <path d="M422 182 H444" stroke="#2454d6" stroke-width="2.4" marker-end="url(#principleArrow)" />
+          <path d="M618 182 H640" stroke="#2454d6" stroke-width="2.4" marker-end="url(#principleArrow)" />
+          <path d="M814 182 H836" stroke="#2454d6" stroke-width="2.4" marker-end="url(#principleArrow)" />
+          <rect x="90" y="274" width="880" height="24" rx="12" fill="#ffffff" stroke="#d8e0ec" />
+          <text x="118" y="291" class="svg-small">读图方式：从左到右，先让系统产生事实，再让规则筛选，再让 Agent 在边界内解释，最终沉淀为团队资产</text>
+        </svg>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>原则一：先证据，后解释</h3>
+          <p>
+            测试 Agent 先驱动系统运行，拿到响应、日志、媒体片段、指标和工具 trace，再进行解释。没有证据的结论不能进入报告。
+          </p>
+        </div>
+        <div class="card">
+          <h3>原则二：确定性判断前置</h3>
+          <p>
+            断言、阈值、进程状态、帧率、亮度、对比度这类稳定计算，应由本地 evaluator 完成。模型只处理需要上下文和推理的部分。
+          </p>
+        </div>
+        <div class="card">
+          <h3>原则三：工具最小权限</h3>
+          <p>
+            Agent 只能调用 Harness 注册的工具。每个工具都有输入 schema、超时、预算和返回结构，避免无边界探索。
+          </p>
+        </div>
+        <div class="card">
+          <h3>原则四：报告可追溯</h3>
+          <p>
+            报告中每个判断都要能追到原始证据、计算指标或工具调用。团队成员看到报告时，知道下一步该复查哪个窗口、哪个文件、哪次调用。
+          </p>
+        </div>
+        <div class="card">
+          <h3>原则五：用例资产化</h3>
+          <p>
+            测试意图不能只存在于对话里。高价值场景应沉淀为 Markdown、JSON、OpenSpec task 或 CI 入口，让验证能重复运行。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <h2>5. 推荐的七层架构</h2>
+      <p>
+        一个可维护的测试 Agent 不应把所有能力塞进一个 prompt。更合适的做法是分层：上层负责意图和编排，下层负责真实动作和证据，中间用确定性 evaluator 降噪，最后再让 Agent 做诊断和报告。
+      </p>
+      <div class="mini-flow">
+        <div class="mini-step">
+          <b>先定义入口</b>
+          <span>明确验证来自 PR、OpenSpec、CLI、GUI 还是 Agent 交付钩子。</span>
+        </div>
+        <div class="mini-step">
+          <b>再定义工具</b>
+          <span>把 Harness 能力封成 action：HTTP、RPC、AV、process、wait。</span>
+        </div>
+        <div class="mini-step">
+          <b>建立证据仓</b>
+          <span>统一保存响应、日志、帧、片段、指标和工具 trace。</span>
+        </div>
+        <div class="mini-step">
+          <b>注册 Evaluator</b>
+          <span>把断言、阈值、质量维度和评分规则沉到代码里。</span>
+        </div>
+        <div class="mini-step">
+          <b>接入诊断 Agent</b>
+          <span>只在候选异常出现时调用模型，并强制结构化报告。</span>
+        </div>
+      </div>
+      <div class="svg-panel">
+        <svg class="svg-diagram" viewBox="0 0 1060 660" role="img" aria-label="测试 Agent 七层参考架构图">
+          <defs>
+            <linearGradient id="archHeader" x1="0" x2="1">
+              <stop offset="0" stop-color="#f7fbff" />
+              <stop offset="1" stop-color="#f7faf7" />
+            </linearGradient>
+            <linearGradient id="agentCard" x1="0" x2="1">
+              <stop offset="0" stop-color="#eef4ff" />
+              <stop offset="1" stop-color="#ffffff" />
+            </linearGradient>
+            <linearGradient id="toolCard" x1="0" x2="1">
+              <stop offset="0" stop-color="#ecfdf5" />
+              <stop offset="1" stop-color="#ffffff" />
+            </linearGradient>
+            <linearGradient id="evidenceCard" x1="0" x2="1">
+              <stop offset="0" stop-color="#eff8ff" />
+              <stop offset="1" stop-color="#ffffff" />
+            </linearGradient>
+            <linearGradient id="evalCard" x1="0" x2="1">
+              <stop offset="0" stop-color="#fff7ed" />
+              <stop offset="1" stop-color="#ffffff" />
+            </linearGradient>
+            <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+              <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#101828" flood-opacity="0.13" />
+            </filter>
+            <marker id="arrowBlue" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#2454d6" />
+            </marker>
+            <marker id="arrowGreen" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#07825f" />
+            </marker>
+            <marker id="arrowAmber" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#b76e00" />
+            </marker>
+          </defs>
+
+          <rect x="0" y="0" width="1060" height="660" fill="#ffffff" />
+          <rect x="24" y="22" width="1012" height="616" rx="14" fill="url(#archHeader)" stroke="#d8e0ec" />
+          <text x="52" y="58" class="svg-title">测试 Agent 参考架构</text>
+          <text x="52" y="82" class="svg-subtitle">从验证意图到可复查报告：Agent 负责控制面，Harness 负责事实与证据</text>
+
+          <rect x="46" y="108" width="968" height="142" rx="12" fill="#ffffff" stroke="#dce3ed" />
+          <text x="64" y="131" class="svg-lane">Agent 控制面</text>
+          <rect x="46" y="282" width="968" height="168" rx="12" fill="#ffffff" stroke="#dce3ed" />
+          <text x="64" y="305" class="svg-lane">Harness 工具与证据面</text>
+          <rect x="46" y="488" width="968" height="92" rx="12" fill="#ffffff" stroke="#dce3ed" />
+          <text x="64" y="511" class="svg-lane">被测系统与运行源</text>
+
+          <g filter="url(#softShadow)">
+            <rect x="72" y="148" width="150" height="82" rx="10" fill="url(#agentCard)" stroke="#b8cdfb" />
+            <rect x="92" y="164" width="34" height="34" rx="8" fill="#2454d6" opacity="0.12" />
+            <text x="104" y="187" font-size="18" font-weight="700" fill="#2454d6">1</text>
+            <text x="138" y="174" class="svg-label">意图入口</text>
+            <text x="138" y="197" class="svg-small">需求 / PR / GUI</text>
+            <text x="138" y="216" class="svg-small">OpenSpec / 用例</text>
+
+            <rect x="266" y="148" width="150" height="82" rx="10" fill="url(#agentCard)" stroke="#b8cdfb" />
+            <rect x="286" y="164" width="34" height="34" rx="8" fill="#2454d6" opacity="0.12" />
+            <text x="298" y="187" font-size="18" font-weight="700" fill="#2454d6">2</text>
+            <text x="332" y="174" class="svg-label">Planner</text>
+            <text x="332" y="197" class="svg-small">场景选择</text>
+            <text x="332" y="216" class="svg-small">预算与停止条件</text>
+
+            <rect x="460" y="148" width="150" height="82" rx="10" fill="url(#agentCard)" stroke="#b8cdfb" />
+            <rect x="480" y="164" width="34" height="34" rx="8" fill="#2454d6" opacity="0.12" />
+            <text x="492" y="187" font-size="18" font-weight="700" fill="#2454d6">3</text>
+            <text x="526" y="174" class="svg-label">Executor</text>
+            <text x="526" y="197" class="svg-small">调用工具</text>
+            <text x="526" y="216" class="svg-small">记录 trace</text>
+
+            <rect x="654" y="148" width="150" height="82" rx="10" fill="#f5f0ff" stroke="#c9b8f5" />
+            <rect x="674" y="164" width="34" height="34" rx="8" fill="#6941c6" opacity="0.12" />
+            <text x="686" y="187" font-size="18" font-weight="700" fill="#6941c6">6</text>
+            <text x="720" y="174" class="svg-label">Diagnosis</text>
+            <text x="720" y="197" class="svg-small">异常解释</text>
+            <text x="720" y="216" class="svg-small">排查建议</text>
+
+            <rect x="848" y="148" width="150" height="82" rx="10" fill="#f6fef9" stroke="#a6d8c3" />
+            <rect x="868" y="164" width="34" height="34" rx="8" fill="#07825f" opacity="0.12" />
+            <text x="880" y="187" font-size="18" font-weight="700" fill="#07825f">7</text>
+            <text x="914" y="174" class="svg-label">报告资产</text>
+            <text x="914" y="197" class="svg-small">HTML / JSON</text>
+            <text x="914" y="216" class="svg-small">复跑用例</text>
+          </g>
+
+          <path d="M222 189 H262" stroke="#2454d6" stroke-width="2.4" marker-end="url(#arrowBlue)" />
+          <path d="M416 189 H456" stroke="#2454d6" stroke-width="2.4" marker-end="url(#arrowBlue)" />
+          <path d="M610 189 H650" stroke="#2454d6" stroke-width="2.4" marker-end="url(#arrowBlue)" />
+          <path d="M804 189 H844" stroke="#07825f" stroke-width="2.4" marker-end="url(#arrowGreen)" />
+
+          <g filter="url(#softShadow)">
+            <rect x="74" y="326" width="184" height="86" rx="10" fill="url(#toolCard)" stroke="#a6d8c3" />
+            <text x="98" y="352" class="svg-label">动作工具层</text>
+            <rect x="98" y="368" width="48" height="22" rx="11" fill="#e8f7f0" stroke="#b7e0ce" />
+            <text x="110" y="383" class="svg-chip">HTTP</text>
+            <rect x="154" y="368" width="42" height="22" rx="11" fill="#e8f7f0" stroke="#b7e0ce" />
+            <text x="166" y="383" class="svg-chip">RPC</text>
+            <rect x="204" y="368" width="32" height="22" rx="11" fill="#e8f7f0" stroke="#b7e0ce" />
+            <text x="214" y="383" class="svg-chip">AV</text>
+
+            <rect x="304" y="326" width="184" height="86" rx="10" fill="url(#evidenceCard)" stroke="#a8d6f0" />
+            <text x="328" y="352" class="svg-label">证据采集层</text>
+            <text x="328" y="378" class="svg-small">响应 / 帧 / 流包</text>
+            <text x="328" y="397" class="svg-small">音频指标 / 进程采样</text>
+
+            <rect x="534" y="326" width="184" height="86" rx="10" fill="url(#evalCard)" stroke="#f0c58e" />
+            <text x="558" y="352" class="svg-label">本地 Evaluator</text>
+            <text x="558" y="378" class="svg-small">断言 / 阈值 / 评分</text>
+            <text x="558" y="397" class="svg-small">候选异常筛选</text>
+
+            <rect x="764" y="326" width="184" height="86" rx="10" fill="#fff5f5" stroke="#f2aaaa" />
+            <text x="788" y="352" class="svg-label">输出 Schema</text>
+            <text x="788" y="378" class="svg-small">verdict / dimensions</text>
+            <text x="788" y="397" class="svg-small">evidence / next steps</text>
+          </g>
+
+          <path d="M535 230 V308 H166 V322" stroke="#2454d6" stroke-width="2.4" fill="none" marker-end="url(#arrowBlue)" />
+          <path d="M258 369 H298" stroke="#07825f" stroke-width="2.4" marker-end="url(#arrowGreen)" />
+          <path d="M488 369 H528" stroke="#b76e00" stroke-width="2.4" marker-end="url(#arrowAmber)" />
+          <path d="M718 369 H758" stroke="#b76e00" stroke-width="2.4" marker-end="url(#arrowAmber)" />
+          <path d="M856 326 V256 H729 V234" stroke="#6941c6" stroke-width="2.4" fill="none" marker-end="url(#arrowBlue)" />
+
+          <g filter="url(#softShadow)">
+            <rect x="92" y="526" width="160" height="38" rx="8" fill="#ffffff" stroke="#c9d3e2" />
+            <text x="116" y="551" class="svg-label">capture-service</text>
+            <rect x="306" y="526" width="154" height="38" rx="8" fill="#ffffff" stroke="#c9d3e2" />
+            <text x="342" y="551" class="svg-label">Worker</text>
+            <rect x="514" y="526" width="174" height="38" rx="8" fill="#ffffff" stroke="#c9d3e2" />
+            <text x="544" y="551" class="svg-label">media_capture</text>
+            <rect x="742" y="526" width="174" height="38" rx="8" fill="#ffffff" stroke="#c9d3e2" />
+            <text x="764" y="551" class="svg-label">RTSP / StreamPacket</text>
+          </g>
+
+          <path d="M166 412 V506" stroke="#07825f" stroke-width="2.4" fill="none" marker-end="url(#arrowGreen)" />
+          <path d="M252 545 H302" stroke="#07825f" stroke-width="2.4" marker-end="url(#arrowGreen)" />
+          <path d="M460 545 H510" stroke="#07825f" stroke-width="2.4" marker-end="url(#arrowGreen)" />
+          <path d="M688 545 H738" stroke="#07825f" stroke-width="2.4" marker-end="url(#arrowGreen)" />
+          <path d="M829 526 V458 H396 V416" stroke="#2454d6" stroke-width="2.4" fill="none" marker-end="url(#arrowBlue)" />
+
+          <rect x="74" y="604" width="934" height="24" rx="12" fill="#f2f4f7" stroke="#dde4ee" />
+          <text x="96" y="621" class="svg-small">设计约束：工具最小权限 · 证据先行 · 本地判断前置 · Agent 诊断收敛到结构化报告</text>
+        </svg>
+      </div>
+      <p>
+        报告层不是简单收尾，而是把一次运行转化为团队资产：将执行步骤、证据路径、指标、诊断结果和后续建议写入 HTML/JSON/Markdown 报告，并把高价值场景反哺为可复跑用例。
+      </p>
+      <div class="callout">
+        <strong>架构思想：</strong>Agent 是控制面的一部分，不是事实来源。事实来源应来自 Harness 工具和被测系统；Agent 的价值在于规划、选择工具、解释证据和压缩上下文。
+      </div>
+    </section>
+
+    <section id="agent-design">
+      <h2>6. Agent 本身怎么设计</h2>
+      <p>
+        真正落地时，可以先把测试 Agent 看成一个带状态的工程控制回路，而不是一段 prompt。它的每一步都有输入、输出和可审计记录。
+      </p>
+      <p>
+        搭建时不要从“写一个大 prompt”开始，而要先把 Agent 运行所需的外壳搭好：输入契约决定它验证什么，工具契约决定它能做什么，证据仓决定它能留下什么，Evaluator 决定哪些判断不需要模型参与，输出 schema 决定团队如何消费结果。
+      </p>
+      <pre><code>receive test intent
+  → build verification plan
+  → check environment and prerequisites
+  → execute Harness actions
+  → store evidence
+  → run deterministic evaluators
+  → diagnose candidate anomalies
+  → submit structured report</code></pre>
+      <div class="svg-panel">
+        <svg class="svg-diagram" viewBox="0 0 1060 460" role="img" aria-label="测试 Agent 控制回路图">
+          <defs>
+            <linearGradient id="loopBg" x1="0" x2="1">
+              <stop offset="0" stop-color="#ffffff" />
+              <stop offset="1" stop-color="#f8fbff" />
+            </linearGradient>
+            <linearGradient id="loopAgent" x1="0" x2="1">
+              <stop offset="0" stop-color="#eef4ff" />
+              <stop offset="1" stop-color="#ffffff" />
+            </linearGradient>
+            <linearGradient id="loopData" x1="0" x2="1">
+              <stop offset="0" stop-color="#ecfdf5" />
+              <stop offset="1" stop-color="#ffffff" />
+            </linearGradient>
+            <filter id="loopShadow" x="-20%" y="-20%" width="140%" height="150%">
+              <feDropShadow dx="0" dy="9" stdDeviation="9" flood-color="#101828" flood-opacity="0.12" />
+            </filter>
+            <marker id="loopArrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#2454d6" />
+            </marker>
+            <marker id="loopArrowGreen" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#07825f" />
+            </marker>
+            <marker id="loopArrowAmber" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#b76e00" />
+            </marker>
+          </defs>
+
+          <rect x="0" y="0" width="1060" height="460" fill="url(#loopBg)" />
+          <rect x="24" y="22" width="1012" height="416" rx="14" fill="#ffffff" stroke="#d8e0ec" />
+          <text x="52" y="60" class="svg-title">测试 Agent 控制回路</text>
+          <text x="52" y="84" class="svg-subtitle">把模型拆成有限职责角色，让每一步都通过 Harness 工具和证据仓闭环</text>
+
+          <g filter="url(#loopShadow)">
+            <rect x="100" y="138" width="190" height="94" rx="12" fill="url(#loopAgent)" stroke="#b8cdfb" />
+            <text x="128" y="166" class="svg-label">Planner Agent</text>
+            <text x="128" y="193" class="svg-small">把需求转成验证计划</text>
+            <text x="128" y="214" class="svg-small">场景 · 前置 · 预算</text>
+            <text x="128" y="233" class="svg-small">停止条件</text>
+
+            <rect x="406" y="104" width="220" height="104" rx="12" fill="url(#loopAgent)" stroke="#b8cdfb" />
+            <text x="438" y="135" class="svg-label">Executor Agent</text>
+            <text x="438" y="163" class="svg-small">只通过注册 action 运行系统</text>
+            <text x="438" y="184" class="svg-small">HTTP · RPC · AV · process · wait</text>
+
+            <rect x="746" y="138" width="190" height="94" rx="12" fill="#f5f0ff" stroke="#c9b8f5" />
+            <text x="774" y="166" class="svg-label">Diagnosis Agent</text>
+            <text x="774" y="193" class="svg-small">解释候选异常</text>
+            <text x="774" y="214" class="svg-small">工具验证 · 置信度 · 建议</text>
+
+            <rect x="90" y="292" width="208" height="74" rx="12" fill="#fff7ed" stroke="#f0c58e" />
+            <text x="122" y="321" class="svg-label">Evaluator Registry</text>
+            <text x="122" y="347" class="svg-small">断言、阈值、质量维度、评分</text>
+
+            <rect x="394" y="276" width="246" height="98" rx="12" fill="url(#loopData)" stroke="#a6d8c3" />
+            <text x="432" y="307" class="svg-label">Evidence Store</text>
+            <text x="432" y="335" class="svg-small">响应 · 日志 · 帧 · 片段 · 流包</text>
+            <text x="432" y="356" class="svg-small">工具 trace · 指标 · 证据索引</text>
+
+            <rect x="744" y="292" width="208" height="74" rx="12" fill="#f6fef9" stroke="#a6d8c3" />
+            <text x="782" y="321" class="svg-label">Structured Report</text>
+            <text x="782" y="347" class="svg-small">verdict · dimensions · next steps</text>
+          </g>
+
+          <path d="M290 184 C340 148, 358 138, 402 143" stroke="#2454d6" stroke-width="2.5" fill="none" marker-end="url(#loopArrow)" />
+          <text x="318" y="137" class="svg-small">plan</text>
+          <path d="M626 156 C676 143, 704 150, 742 174" stroke="#2454d6" stroke-width="2.5" fill="none" marker-end="url(#loopArrow)" />
+          <text x="676" y="136" class="svg-small">anomaly context</text>
+          <path d="M516 208 V270" stroke="#07825f" stroke-width="2.5" fill="none" marker-end="url(#loopArrowGreen)" />
+          <text x="532" y="244" class="svg-small">store evidence</text>
+          <path d="M394 326 H304" stroke="#b76e00" stroke-width="2.5" fill="none" marker-end="url(#loopArrowAmber)" />
+          <text x="316" y="310" class="svg-small">evaluate</text>
+          <path d="M640 326 H740" stroke="#07825f" stroke-width="2.5" fill="none" marker-end="url(#loopArrowGreen)" />
+          <text x="662" y="310" class="svg-small">report facts</text>
+          <path d="M848 292 V240" stroke="#6941c6" stroke-width="2.5" fill="none" marker-end="url(#loopArrow)" />
+          <text x="862" y="268" class="svg-small">submit_report</text>
+          <path d="M194 292 V240" stroke="#b76e00" stroke-width="2.5" fill="none" marker-end="url(#loopArrowAmber)" />
+          <text x="210" y="268" class="svg-small">candidate signals</text>
+
+          <rect x="102" y="398" width="854" height="24" rx="12" fill="#f2f4f7" stroke="#dde4ee" />
+          <text x="126" y="415" class="svg-small">控制原则：Planner 不伪造执行结果 · Executor 不越权调用 · Diagnosis 不覆盖证据 · Report 保留复查路径</text>
+        </svg>
+      </div>
+      <table>
+        <thead>
+          <tr><th>设计对象</th><th>需要定义清楚什么</th><th>为什么重要</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>输入契约</td>
+            <td>目标、范围、环境、前置条件、预算、停止条件</td>
+            <td>让 Agent 知道验证什么，以及什么时候停止</td>
+          </tr>
+          <tr>
+            <td>工具契约</td>
+            <td>action 名称、参数 schema、超时、权限、返回结构</td>
+            <td>让执行可控、可记录、可复现</td>
+          </tr>
+          <tr>
+            <td>证据仓</td>
+            <td>响应、日志、截图、帧、片段、指标、工具 trace 的保存路径</td>
+            <td>让报告能被人复查，也能被后续 Agent 继续使用</td>
+          </tr>
+          <tr>
+            <td>Evaluator 注册表</td>
+            <td>断言表达式、质量维度、阈值、评分规则、跳过规则</td>
+            <td>让稳定判断沉到代码里，减少模型随意性</td>
+          </tr>
+          <tr>
+            <td>输出 schema</td>
+            <td>总体结论、分维度结果、证据索引、风险项、下一步建议</td>
+            <td>让报告格式稳定，方便 review、CI 和历史对比</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        测试 Agent 可以拆成三种协作角色。小项目可以由一个 Agent 扮演多个角色，大项目建议显式拆开，方便限制权限和复用能力。
+      </p>
+      <table>
+        <thead>
+          <tr><th>Agent 角色</th><th>输入</th><th>输出</th><th>关键约束</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Planner Agent</td>
+            <td>需求说明、diff、OpenSpec、历史用例</td>
+            <td>验证计划：场景、前置条件、工具清单、停止条件</td>
+            <td>只产计划，不直接伪造执行结果</td>
+          </tr>
+          <tr>
+            <td>Executor Agent</td>
+            <td>验证计划和 Harness tool registry</td>
+            <td>执行 trace、原始证据、结构化 step result</td>
+            <td>只能通过工具运行系统，所有动作要可记录</td>
+          </tr>
+          <tr>
+            <td>Diagnosis Agent</td>
+            <td>候选异常、证据窗口、本地指标、工具结果</td>
+            <td>根因假设、置信度、修复建议、`submit_report`</td>
+            <td>不重复基础检测，必须调用结构化报告工具收尾</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        当前 capture-tester 中的 `runAnalysisAgent` 更接近 Diagnosis Agent。它的系统提示明确要求“本地检测已经发现异常，重点是根因调查”，并通过 `submit_report` 强制输出结构化报告；工具注册表只提供 frame、video、audio、stream 和可选 code tools。
+      </p>
+      <pre><code>local anomaly
+  → build system prompt with available tools
+  → choose targeted tool calls
+  → inspect stream/frame/audio/code evidence
+  → call submit_report
+  → merge into session summary</code></pre>
+      <p>
+        这种设计的关键是把 Agent 放在“证据之后、报告之前”。它不负责制造事实，只负责把事实组织成可理解、可行动的解释。
+      </p>
+    </section>
+
+    <section id="evidence">
+      <h2>7. 证据链和判断边界</h2>
+      <p>
+        测试 Agent 的文档、prompt 和报告都要明确区分四类信息：事实、指标、解释、决策。混在一起，团队就很难判断报告是否可信。
+      </p>
+      <div class="svg-panel">
+        <svg class="svg-diagram" viewBox="0 0 1060 430" role="img" aria-label="测试 Agent 证据链图">
+          <defs>
+            <filter id="evidenceShadow" x="-20%" y="-20%" width="140%" height="150%">
+              <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#101828" flood-opacity="0.1" />
+            </filter>
+            <marker id="evidenceArrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#2454d6" />
+            </marker>
+          </defs>
+          <rect x="0" y="0" width="1060" height="430" fill="#ffffff" />
+          <rect x="24" y="24" width="1012" height="382" rx="14" fill="#f8fafc" stroke="#d8e0ec" />
+          <text x="52" y="62" class="svg-title">证据链：每个结论都能回溯</text>
+          <text x="52" y="86" class="svg-subtitle">测试 Agent 的可信度来自可复查证据，而不是自然语言本身</text>
+
+          <g filter="url(#evidenceShadow)">
+            <rect x="58" y="132" width="170" height="118" rx="12" fill="#eef4ff" stroke="#b8cdfb" />
+            <text x="84" y="162" class="svg-label">事实</text>
+            <text x="84" y="190" class="svg-small">response</text>
+            <text x="84" y="211" class="svg-small">sessionId / pid</text>
+            <text x="84" y="232" class="svg-small">streamUrl</text>
+
+            <rect x="254" y="132" width="170" height="118" rx="12" fill="#ecfdf5" stroke="#a6d8c3" />
+            <text x="280" y="162" class="svg-label">证据</text>
+            <text x="280" y="190" class="svg-small">帧 / 片段 / 日志</text>
+            <text x="280" y="211" class="svg-small">StreamPacket</text>
+            <text x="280" y="232" class="svg-small">音频指标</text>
+
+            <rect x="450" y="132" width="170" height="118" rx="12" fill="#fff7ed" stroke="#f0c58e" />
+            <text x="476" y="162" class="svg-label">指标</text>
+            <text x="476" y="190" class="svg-small">assertion</text>
+            <text x="476" y="211" class="svg-small">fps / brightness</text>
+            <text x="476" y="232" class="svg-small">RMS / memory</text>
+
+            <rect x="646" y="132" width="170" height="118" rx="12" fill="#f5f0ff" stroke="#c9b8f5" />
+            <text x="672" y="162" class="svg-label">解释</text>
+            <text x="672" y="190" class="svg-small">原因假设</text>
+            <text x="672" y="211" class="svg-small">工具分析</text>
+            <text x="672" y="232" class="svg-small">代码路径</text>
+
+            <rect x="842" y="132" width="170" height="118" rx="12" fill="#f6fef9" stroke="#a6d8c3" />
+            <text x="868" y="162" class="svg-label">决策输入</text>
+            <text x="868" y="190" class="svg-small">风险说明</text>
+            <text x="868" y="211" class="svg-small">下一步建议</text>
+            <text x="868" y="232" class="svg-small">review 输入</text>
+          </g>
+
+          <path d="M228 191 H250" stroke="#2454d6" stroke-width="2.4" marker-end="url(#evidenceArrow)" />
+          <path d="M424 191 H446" stroke="#2454d6" stroke-width="2.4" marker-end="url(#evidenceArrow)" />
+          <path d="M620 191 H642" stroke="#2454d6" stroke-width="2.4" marker-end="url(#evidenceArrow)" />
+          <path d="M816 191 H838" stroke="#2454d6" stroke-width="2.4" marker-end="url(#evidenceArrow)" />
+
+          <rect x="74" y="304" width="250" height="40" rx="8" fill="#ffffff" stroke="#d8e0ec" />
+          <text x="98" y="329" class="svg-small">事实回答：系统返回了什么？</text>
+          <rect x="380" y="304" width="250" height="40" rx="8" fill="#ffffff" stroke="#d8e0ec" />
+          <text x="404" y="329" class="svg-small">指标回答：条件是否满足？</text>
+          <rect x="686" y="304" width="250" height="40" rx="8" fill="#ffffff" stroke="#d8e0ec" />
+          <text x="710" y="329" class="svg-small">解释回答：下一步怎么处理？</text>
+        </svg>
+      </div>
+      <table>
+        <thead>
+          <tr><th>层级</th><th>产物</th><th>判断边界</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>事实</td>
+            <td>HTTP/RPC response、sessionId、streamUrl、Worker pid、文件路径</td>
+            <td>证明系统实际返回了什么</td>
+          </tr>
+          <tr>
+            <td>证据</td>
+            <td>帧、音频指标、fMP4 片段、StreamPacket、日志</td>
+            <td>证明运行过程中观察到了什么</td>
+          </tr>
+          <tr>
+            <td>指标</td>
+            <td>断言结果、帧率、亮度、对比度、RMS、clip、内存采样</td>
+            <td>证明某些可计算条件是否满足</td>
+          </tr>
+          <tr>
+            <td>解释</td>
+            <td>异常原因假设、代码路径、工具分析结果</td>
+            <td>说明现象可能为什么发生，需要置信度</td>
+          </tr>
+          <tr>
+            <td>决策输入</td>
+            <td>报告结论、风险说明、下一步建议</td>
+            <td>用于 review、修复、回归和验收协作</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout ok">
+        <strong>落地建议：</strong>报告不要只写“通过/失败”。至少要包含执行步骤、关键证据、异常窗口、本地指标、Agent 工具调用、最终建议。
+      </div>
+    </section>
+
+    <section id="av">
+      <h2>8. 音视频业务验证如何落地</h2>
+      <p class="lead">
+        音视频是测试 Agent 很适合介入的领域，因为业务效果依赖真实运行：有流不等于画面好，有帧不等于不卡顿，有音频轨不等于有有效声音。
+      </p>
+      <p>
+        设计这类 Agent 时，可以把音视频验证分成三段：真实链路取证、确定性筛选、上下文诊断。
+      </p>
+      <div class="svg-panel">
+        <svg class="svg-diagram" viewBox="0 0 1060 450" role="img" aria-label="音视频验证闭环图">
+          <defs>
+            <filter id="avShadow" x="-20%" y="-20%" width="140%" height="150%">
+              <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#101828" flood-opacity="0.11" />
+            </filter>
+            <marker id="avArrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#2454d6" />
+            </marker>
+          </defs>
+          <rect x="0" y="0" width="1060" height="450" fill="#ffffff" />
+          <rect x="24" y="24" width="1012" height="402" rx="14" fill="#f8fafc" stroke="#d8e0ec" />
+          <text x="52" y="62" class="svg-title">音视频验证闭环</text>
+          <text x="52" y="86" class="svg-subtitle">先确认真实链路，再用稳定指标筛选，最后让 Agent 做上下文诊断</text>
+
+          <g filter="url(#avShadow)">
+            <rect x="64" y="132" width="246" height="130" rx="12" fill="#eef4ff" stroke="#b8cdfb" />
+            <text x="94" y="164" class="svg-label">1. 真实链路取证</text>
+            <text x="94" y="192" class="svg-small">HTTP/RPC 创建 session</text>
+            <text x="94" y="214" class="svg-small">RTSP / RPC callback 出流</text>
+            <text x="94" y="236" class="svg-small">fMP4 · JPEG · StreamPacket</text>
+
+            <rect x="382" y="132" width="246" height="130" rx="12" fill="#fff7ed" stroke="#f0c58e" />
+            <text x="412" y="164" class="svg-label">2. 确定性筛选</text>
+            <text x="412" y="192" class="svg-small">fps · 亮度 · 对比度</text>
+            <text x="412" y="214" class="svg-small">RMS · clipping · memory</text>
+            <text x="412" y="236" class="svg-small">只产候选异常</text>
+
+            <rect x="700" y="132" width="246" height="130" rx="12" fill="#f5f0ff" stroke="#c9b8f5" />
+            <text x="730" y="164" class="svg-label">3. 上下文诊断</text>
+            <text x="730" y="192" class="svg-small">启动阶段 / 场景内容</text>
+            <text x="730" y="214" class="svg-small">流时序 / 编码参数</text>
+            <text x="730" y="236" class="svg-small">代码路径和修复建议</text>
+          </g>
+
+          <path d="M310 197 H376" stroke="#2454d6" stroke-width="2.8" marker-end="url(#avArrow)" />
+          <path d="M628 197 H694" stroke="#2454d6" stroke-width="2.8" marker-end="url(#avArrow)" />
+
+          <rect x="92" y="322" width="856" height="48" rx="12" fill="#ffffff" stroke="#d8e0ec" />
+          <text x="124" y="351" class="svg-small">关键边界：黑画面、静止画面、静音都只是现象；测试 Agent 要结合时间段、场景、流包和代码路径判断含义。</text>
+        </svg>
+      </div>
+      <table>
+        <thead>
+          <tr><th>阶段</th><th>设计目标</th><th>典型实现</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>真实链路取证</td>
+            <td>证明被测服务真的创建了会话并产生媒体输出</td>
+            <td>RTSP 拉流、RPC callback 收包、fMP4、JPEG 抽帧、AudioMeter</td>
+          </tr>
+          <tr>
+            <td>确定性筛选</td>
+            <td>快速发现高信号候选异常，减少模型调用噪声</td>
+            <td>帧率、亮度、过曝、极低对比度、音频 RMS、削顶、进程状态</td>
+          </tr>
+          <tr>
+            <td>上下文诊断</td>
+            <td>解释异常是否与启动阶段、场景内容、流时序、编码参数或代码路径相关</td>
+            <td>frame/video/audio/stream/code tools + `submit_report`</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        这里最重要的边界是：黑画面、静止画面、静音这类现象不能只靠一个阈值直接解释成缺陷。测试 Agent 要先保留窗口证据，再结合时间段、启动状态、流包、编码信息和代码路径判断它属于场景内容、正常初始化、链路异常，还是实现问题。
+      </p>
+      <pre><code>create session
+  → collect stream evidence
+  → run local evaluator
+  → if anomaly changes: run diagnosis agent
+  → submit structured report
+  → generate session summary</code></pre>
+    </section>
+
+    <section id="harness-map">
+      <h2>9. 如何融入当前 Harness 流程</h2>
+      <p>
+        `capture-service-harness` 已经具备这套架构的核心雏形。它不是单个脚本，而是一个围绕 capture-service 的验证平台。
+      </p>
+      <p>
+        融入 Harness 的关键，是把测试 Agent 接到已有验证链路的“编排层”，而不是让它绕开 Harness 自己操作系统。Agent 负责选择场景和解释异常，Harness 负责真实执行、证据采集和可重复报告。
+      </p>
+      <div class="mini-flow">
+        <div class="mini-step">
+          <b>交付触发</b>
+          <span>开发 Agent 完成变更后，选择 smoke、回归或 GUI 实时分析入口。</span>
+        </div>
+        <div class="mini-step">
+          <b>Runner 编排</b>
+          <span>CLI/GUI 将任务转成标准 action，交给 StepExecutor 或 analyzer。</span>
+        </div>
+        <div class="mini-step">
+          <b>真实执行</b>
+          <span>通过 HTTP/RPC/媒体链路驱动 Worker，而不是只读代码。</span>
+        </div>
+        <div class="mini-step">
+          <b>证据评估</b>
+          <span>收集响应、帧、流包、音频指标，再用本地规则筛选。</span>
+        </div>
+        <div class="mini-step">
+          <b>报告回流</b>
+          <span>异常交给诊断 Agent，最终报告进入 review 和后续回归。</span>
+        </div>
+      </div>
+      <div class="svg-panel">
+        <svg class="svg-diagram" viewBox="0 0 1060 480" role="img" aria-label="capture-service-harness 组件映射图">
+          <defs>
+            <filter id="mapShadow" x="-20%" y="-20%" width="140%" height="150%">
+              <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#101828" flood-opacity="0.11" />
+            </filter>
+            <marker id="mapArrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto">
+              <path d="M0,0 L10,5.5 L0,11 Z" fill="#2454d6" />
+            </marker>
+          </defs>
+          <rect x="0" y="0" width="1060" height="480" fill="#ffffff" />
+          <rect x="24" y="24" width="1012" height="432" rx="14" fill="#f8fafc" stroke="#d8e0ec" />
+          <text x="52" y="62" class="svg-title">当前 Harness 项目映射</text>
+          <text x="52" y="86" class="svg-subtitle">把抽象架构落到 capture-tester 的真实模块上</text>
+
+          <g filter="url(#mapShadow)">
+            <rect x="70" y="128" width="190" height="84" rx="12" fill="#eef4ff" stroke="#b8cdfb" />
+            <text x="96" y="158" class="svg-label">入口层</text>
+            <text x="96" y="184" class="svg-small">Electron GUI</text>
+            <text x="96" y="204" class="svg-small">capture-tester test</text>
+
+            <rect x="312" y="128" width="190" height="84" rx="12" fill="#ecfdf5" stroke="#a6d8c3" />
+            <text x="338" y="158" class="svg-label">动作工具层</text>
+            <text x="338" y="184" class="svg-small">StepExecutor</text>
+            <text x="338" y="204" class="svg-small">http/rpc/av/process</text>
+
+            <rect x="554" y="128" width="190" height="84" rx="12" fill="#eff8ff" stroke="#a8d6f0" />
+            <text x="580" y="158" class="svg-label">证据采集层</text>
+            <text x="580" y="184" class="svg-small">streamPump / ffmpegRunner</text>
+            <text x="580" y="204" class="svg-small">SegmentCapture / AudioMeter</text>
+
+            <rect x="796" y="128" width="190" height="84" rx="12" fill="#fff7ed" stroke="#f0c58e" />
+            <text x="822" y="158" class="svg-label">本地评估层</text>
+            <text x="822" y="184" class="svg-small">LocalDetector</text>
+            <text x="822" y="204" class="svg-small">assertion / scoring</text>
+
+            <rect x="244" y="300" width="220" height="86" rx="12" fill="#f5f0ff" stroke="#c9b8f5" />
+            <text x="274" y="330" class="svg-label">诊断 Agent 层</text>
+            <text x="274" y="356" class="svg-small">runAnalysisAgent</text>
+            <text x="274" y="376" class="svg-small">tool registry + submit_report</text>
+
+            <rect x="560" y="300" width="220" height="86" rx="12" fill="#f6fef9" stroke="#a6d8c3" />
+            <text x="590" y="330" class="svg-label">报告层</text>
+            <text x="590" y="356" class="svg-small">HTML report</text>
+            <text x="590" y="376" class="svg-small">window result / session summary</text>
+          </g>
+
+          <path d="M260 170 H306" stroke="#2454d6" stroke-width="2.5" marker-end="url(#mapArrow)" />
+          <path d="M502 170 H548" stroke="#2454d6" stroke-width="2.5" marker-end="url(#mapArrow)" />
+          <path d="M744 170 H790" stroke="#2454d6" stroke-width="2.5" marker-end="url(#mapArrow)" />
+          <path d="M890 212 C864 268, 808 310, 786 330" stroke="#2454d6" stroke-width="2.5" fill="none" marker-end="url(#mapArrow)" />
+          <path d="M560 343 H470" stroke="#2454d6" stroke-width="2.5" fill="none" marker-end="url(#mapArrow)" />
+          <path d="M354 300 C334 270, 340 238, 390 214" stroke="#2454d6" stroke-width="2.5" fill="none" marker-end="url(#mapArrow)" />
+        </svg>
+      </div>
+      <table>
+        <thead>
+          <tr><th>架构层</th><th>当前组件</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>意图入口</td>
+            <td>Electron GUI、`capture-tester test [suite]`、OpenSpec/rules</td>
+            <td>支持交互式分析和声明式回归两种入口</td>
+          </tr>
+          <tr>
+            <td>动作工具</td>
+            <td>`StepExecutor` 的 `http/rpc/av/process/wait` 前缀</td>
+            <td>把测试动作做成可路由、可替换的工具接口</td>
+          </tr>
+          <tr>
+            <td>控制面</td>
+            <td>HTTP adapter、RPC client、双 socket push stream</td>
+            <td>驱动真实 Worker 和采集会话</td>
+          </tr>
+          <tr>
+            <td>证据采集</td>
+            <td>`streamPump`、`ffmpegRunner`、`SegmentCapture`、`AudioMeter`</td>
+            <td>采集预览、帧、音频指标和流包信息</td>
+          </tr>
+          <tr>
+            <td>本地评估</td>
+            <td>`LocalDetector`、assertion evaluator、scoring model</td>
+            <td>做快速筛选和结构化分数</td>
+          </tr>
+          <tr>
+            <td>诊断 Agent</td>
+            <td>`runAnalysisAgent`、tool registry、`submit_report`</td>
+            <td>围绕异常窗口做工具化调查</td>
+          </tr>
+          <tr>
+            <td>报告层</td>
+            <td>HTML report、window result、session summary</td>
+            <td>将运行过程沉淀为可复查资产</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="status">
+      <h2>10. 当前能力边界</h2>
+      <p>
+        设计文档要把“已经落地”和“应该补齐”讲清楚。当前状态可以这样理解：
+      </p>
+      <table>
+        <thead>
+          <tr><th>能力</th><th>当前状态</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GUI 实时视频分析主链路</td>
+            <td><span class="tag-ok">已落地主链路</span></td>
+            <td>`SegmentCapture → LocalDetector → runAnalysisAgent → SessionSummary` 已形成帧窗口分析闭环</td>
+          </tr>
+          <tr>
+            <td>音频指标链路</td>
+            <td><span class="tag-warn">已有采样能力，快检待闭合</span></td>
+            <td>`ffmpegRunner` 与 `AudioMeter` 能产出 RMS、clip、silence 等指标；GUI 本地快检还未统一接入音频判断</td>
+          </tr>
+          <tr>
+            <td>声明式回归框架</td>
+            <td><span class="tag-warn">框架已搭，能力在补齐</span></td>
+            <td>Markdown parser、runner、executor、assertion、report 已有；CLI 当前主要接入 HTTP action</td>
+          </tr>
+          <tr>
+            <td>Agent 工具化诊断</td>
+            <td><span class="tag-ok">核心链路已落地</span></td>
+            <td>工具包括 frame、video、audio、stream、可选 code investigation，并要求通过 `submit_report` 收敛输出</td>
+          </tr>
+          <tr>
+            <td>统一质量模型和 CI 化</td>
+            <td><span class="tag-warn">待收敛</span></td>
+            <td>CLI AV Judge、GUI LocalDetector、Analysis Agent 的维度和阈值需要进一步统一</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>结语</h2>
+      <p>
+        设计测试 Agent 的关键，是把模型放到合适的位置：让 Harness 产生事实，让 evaluator 做稳定判断，让 Agent 负责计划、工具选择、异常解释和报告压缩。
+      </p>
+      <p>
+        capture-service-harness 的经验说明，这套架构尤其适合音视频这种强运行态、强业务语义的项目。只要证据链、工具边界和输出 schema 设计清楚，测试 Agent 就能从一次性的对话助手，变成团队可复用的工程基础设施。
+      </p>
+      <div class="callout ok">
+        <strong>最终目标：</strong>团队不只是拥有一个会跑测试的工具，而是拥有一套“需求变更 → 验证计划 → 真实运行 → 证据采集 → 工具诊断 → 可复查报告”的 Agent 化自测体系。
+      </div>
+    </section>
+    </main>
+  </div>
+</body>
+</html>
