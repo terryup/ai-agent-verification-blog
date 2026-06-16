@@ -12,6 +12,7 @@
       max-width: var(--max-width);
       margin: 0 auto;
       padding: 80px 32px 48px;
+      animation: fadeUp 600ms var(--ease-out) both;
     }
 
     .intro h1 {
@@ -21,13 +22,6 @@
       letter-spacing: -0.03em;
       color: var(--text-primary);
       text-wrap: balance;
-      margin-bottom: 12px;
-    }
-
-    .intro p {
-      font-size: 18px;
-      color: var(--text-secondary);
-      line-height: 1.6;
     }
 
     /* ── Main Grid ─────────────────────────────── */
@@ -59,7 +53,12 @@
     .post {
       padding: 40px 0;
       border-bottom: 1px solid var(--border-subtle);
+      animation: fadeUp 500ms var(--ease-out) both;
     }
+
+    .post:nth-child(2) { animation-delay: 100ms; }
+    .post:nth-child(3) { animation-delay: 200ms; }
+    .post:nth-child(4) { animation-delay: 300ms; }
 
     .post:first-child {
       padding-top: 0;
@@ -76,6 +75,7 @@
       letter-spacing: -0.02em;
       margin-bottom: 12px;
       text-wrap: balance;
+      transition: color var(--duration-fast) var(--ease-out);
     }
 
     .post-title a {
@@ -92,7 +92,7 @@
       font-size: 16px;
       color: var(--text-secondary);
       line-height: 1.5;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       font-style: italic;
     }
 
@@ -101,15 +101,6 @@
       line-height: 1.7;
       color: var(--text-secondary);
       margin-bottom: 20px;
-    }
-
-    .post-meta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 13px;
-      color: var(--text-tertiary);
-      margin-bottom: 16px;
     }
 
     /* ── Read more with arrow animation ────────── */
@@ -164,6 +155,11 @@
 
     .sidebar-section {
       margin-bottom: 48px;
+      animation: fadeUp 500ms var(--ease-out) 200ms both;
+    }
+
+    .sidebar-section:nth-child(2) {
+      animation-delay: 350ms;
     }
 
     .sidebar-section h3 {
@@ -224,11 +220,6 @@
       color: var(--accent);
     }
 
-    .sidebar-post-date {
-      font-size: 13px;
-      color: var(--text-tertiary);
-    }
-
     /* ── Featured post (first post, bigger) ────── */
     .post.featured .post-title {
       font-size: clamp(28px, 4vw, 42px);
@@ -239,6 +230,16 @@
     }
 
     /* ── Responsive ────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .intro, .post, .sidebar-section { animation: none; }
+      .read-more-arrows svg { transition: none; }
+    }
+
     @media (max-width: 768px) {
       .home-grid {
         grid-template-columns: 1fr;
@@ -275,7 +276,6 @@
 
   <div class="intro">
     <h1>zixuan's blog</h1>
-    <p>复杂系统工程实践，AI 辅助开发，测试工程化。</p>
   </div>
 
   <main class="home-grid">
@@ -288,9 +288,6 @@
           <a href="./ai-agent-verification.html">复杂工程里的 AI Agent：如何解决验证难题</a>
         </h2>
         <p class="post-subtitle">AI 写代码越来越快，但验证才是真正的瓶颈</p>
-        <div class="post-meta">
-          <span>2025 年 6 月</span>
-        </div>
         <p class="post-excerpt">
           AI 写代码越来越快，但复杂工程真正卡住的地方往往不是"写不出来"，而是"怎么证明它写对了"。这篇文章探讨如何把验证拆成可交付的证据链，让 Agent 在失败、修复、再验证之间快速循环。
         </p>
@@ -309,9 +306,6 @@
           <a href="./ai-agent-testing-practice-blog.html">如何设计测试 Agent：Harness 自测体系的架构方法</a>
         </h2>
         <p class="post-subtitle">从驱动真实系统到输出可复查报告</p>
-        <div class="post-meta">
-          <span>2025 年 6 月</span>
-        </div>
         <p class="post-excerpt">
           如何在 Harness 自测体系里驱动真实系统、采集证据、稳定评估，并输出可复查报告。涵盖测试 Agent 的职责定义、五条设计原则、七层架构，以及音视频业务的验证落地。
         </p>
@@ -345,13 +339,11 @@
           <p class="sidebar-post-title">
             <a href="./ai-agent-verification.html">复杂工程里的 AI Agent：如何解决验证难题</a>
           </p>
-          <p class="sidebar-post-date">2025 年 6 月</p>
         </div>
         <div class="sidebar-post">
           <p class="sidebar-post-title">
             <a href="./ai-agent-testing-practice-blog.html">如何设计测试 Agent：Harness 自测体系的架构方法</a>
           </p>
-          <p class="sidebar-post-date">2025 年 6 月</p>
         </div>
       </div>
     </aside>
