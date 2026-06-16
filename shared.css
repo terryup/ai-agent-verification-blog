@@ -160,6 +160,7 @@ body {
   line-height: 1.75;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
   transition: background var(--duration-normal) var(--ease-out),
               color var(--duration-normal) var(--ease-out);
 }

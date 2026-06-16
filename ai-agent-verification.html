@@ -6,6 +6,28 @@
   <title>复杂工程里的 AI Agent：如何解决验证难题</title>
   <link rel="stylesheet" href="shared.css" />
   <style>
+    /* ── Hero background ──────────────────────── */
+    .article-hero::before {
+      background:
+        radial-gradient(ellipse 50% 80% at 20% 0%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(147, 51, 234, 0.05) 0%, transparent 70%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.86) 36%, rgba(255, 255, 255, 0.18) 68%),
+        url("./agent-boundary-visuals/cover-background-ai-engineering.png");
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.01);
+    }
+
+    [data-theme="dark"] .article-hero::before {
+      background:
+        radial-gradient(ellipse 50% 80% at 20% 0%, color-mix(in srgb, var(--accent) 8%, transparent) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(147, 51, 234, 0.08) 0%, transparent 70%),
+        linear-gradient(90deg, rgba(10, 10, 10, 0.97) 0%, rgba(10, 10, 10, 0.86) 36%, rgba(10, 10, 10, 0.18) 68%),
+        url("./agent-boundary-visuals/cover-background-ai-engineering.png");
+      background-size: cover;
+      background-position: center;
+    }
+
     /* ── TOC Content ─────────────────────────── */
     .toc-head {
       display: block;
