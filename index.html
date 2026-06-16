@@ -7,9 +7,8 @@
   <title>zixuan's blog</title>
   <link rel="stylesheet" href="shared.css" />
   <style>
-    /* ── Hero / Featured ───────────────────────── */
+    /* ── Featured / Hero ───────────────────────── */
     .featured {
-      position: relative;
       max-width: var(--max-width);
       margin: 48px auto 0;
       padding: 0 32px;
@@ -24,13 +23,9 @@
       text-decoration: none;
       color: inherit;
       animation: fadeInUp 800ms var(--ease-out) both;
-      transition: transform var(--duration-normal) var(--ease-out),
-                  box-shadow var(--duration-normal) var(--ease-out);
     }
 
     .featured-card:hover {
-      transform: scale(1.005);
-      box-shadow: var(--shadow-lg);
       text-decoration: none;
     }
 
@@ -40,7 +35,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform var(--duration-slow) var(--ease-out);
+      transition: transform 500ms var(--ease-out);
     }
 
     .featured-card:hover img {
@@ -53,8 +48,8 @@
       background: linear-gradient(
         90deg,
         rgba(0,0,0,0.72) 0%,
-        rgba(0,0,0,0.45) 50%,
-        rgba(0,0,0,0.1) 100%
+        rgba(0,0,0,0.40) 55%,
+        transparent 100%
       );
     }
 
@@ -62,7 +57,6 @@
       position: absolute;
       bottom: 0;
       left: 0;
-      right: 0;
       padding: 48px;
       color: #fff;
     }
@@ -72,11 +66,8 @@
       padding: 5px 14px;
       border-radius: var(--radius-full);
       background: rgba(255,255,255,0.18);
-      backdrop-filter: blur(8px);
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
       margin-bottom: 16px;
     }
 
@@ -85,6 +76,7 @@
       font-weight: 800;
       line-height: 1.15;
       letter-spacing: -0.03em;
+      text-wrap: balance;
       margin-bottom: 12px;
       max-width: 640px;
     }
@@ -130,7 +122,7 @@
       font-size: 24px;
       font-weight: 800;
       letter-spacing: -0.02em;
-      white-space: nowrap;
+      text-wrap: balance;
     }
 
     .section-heading::after {
@@ -153,7 +145,9 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       overflow: hidden;
-      transition: all var(--duration-normal) var(--ease-out);
+      transition: transform 300ms var(--ease-out),
+                  box-shadow 300ms var(--ease-out),
+                  border-color 300ms var(--ease-out);
       color: inherit;
       text-decoration: none;
     }
@@ -171,14 +165,13 @@
     .article-card-img {
       height: 200px;
       overflow: hidden;
-      position: relative;
     }
 
     .article-card-img img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform var(--duration-slow) var(--ease-out);
+      transition: transform 500ms var(--ease-out);
     }
 
     .article-card:hover .article-card-img img {
@@ -213,9 +206,10 @@
       font-weight: 700;
       line-height: 1.3;
       letter-spacing: -0.02em;
+      text-wrap: balance;
       margin-bottom: 10px;
       color: var(--text-primary);
-      transition: color var(--duration-fast) var(--ease-out);
+      transition: color 150ms var(--ease-out);
     }
 
     .article-card:hover .article-card-title {
@@ -240,6 +234,29 @@
       margin-top: 20px;
     }
 
+    /* ── Reduced Motion ────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .featured-card,
+      .section-heading,
+      .article-card {
+        animation: none;
+      }
+      .featured-card img,
+      .article-card-img img {
+        transition: none;
+      }
+      .featured-card:hover img,
+      .article-card:hover .article-card-img img {
+        transform: none;
+      }
+      .article-card:hover {
+        transform: none;
+      }
+      .featured-link {
+        transition: none;
+      }
+    }
+
     /* ── Responsive ────────────────────────────── */
     @media (max-width: 960px) {
       .featured-card { height: 400px; }
@@ -261,7 +278,7 @@
 <body>
   <header class="site-header">
     <div class="site-header-inner">
-      <a href="index.html" class="site-logo"><span>zixuan</span>'s blog</a>
+      <a href="index.html" class="site-logo">zixuan</a>
       <nav class="site-nav">
         <a href="index.html">Home</a>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">

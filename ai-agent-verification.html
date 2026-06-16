@@ -6,294 +6,75 @@
   <title>复杂工程里的 AI Agent：如何解决验证难题</title>
   <link rel="stylesheet" href="shared.css" />
   <style>
-    /* ── Hero ─────────────────────────────────── */
-    .hero {
-      min-height: 680px;
-      position: relative;
-      overflow: hidden;
-      background: var(--bg-card);
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid var(--border-subtle);
+    /* ── TOC Content ─────────────────────────── */
+    .toc-head {
+      display: block;
+      margin-bottom: 16px;
     }
 
-    .hero::before {
+    .toc-head span {
+      display: block;
+      color: var(--accent);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+    }
+
+    .toc-head strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .toc-links {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    .toc-links a {
+      position: relative;
+      min-height: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      padding: 8px 0 8px 16px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .toc-links a::before {
       content: "";
       position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 50% 80% at 20% 0%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(147, 51, 234, 0.05) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 50% at 50% 100%, rgba(147, 51, 234, 0.06) 0%, transparent 70%),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.86) 36%, rgba(255, 255, 255, 0.18) 68%),
-        url("./agent-boundary-visuals/cover-background-ai-engineering.png");
-      background-size: cover;
-      background-position: center;
-      transform: scale(1.01);
-    }
-
-    [data-theme="dark"] .hero::before {
-      background:
-        radial-gradient(ellipse 50% 80% at 20% 0%, color-mix(in srgb, var(--accent) 8%, transparent) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(147, 51, 234, 0.08) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 50% at 50% 100%, rgba(147, 51, 234, 0.06) 0%, transparent 70%),
-        linear-gradient(90deg, rgba(10, 10, 10, 0.97) 0%, rgba(10, 10, 10, 0.86) 36%, rgba(10, 10, 10, 0.18) 68%),
-        url("./agent-boundary-visuals/cover-background-ai-engineering.png");
-      background-size: cover;
-      background-position: center;
-    }
-
-    .hero-inner {
-      position: relative;
-      max-width: 1180px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 116px 28px 104px;
-    }
-
-    h1 {
-      max-width: 760px;
-      margin: 0 0 24px;
-      font-size: clamp(42px, 7vw, 82px);
-      line-height: 1.04;
-      letter-spacing: 0;
-    }
-
-    .subtitle {
-      max-width: 680px;
-      color: var(--text-secondary);
-      font-size: 25px;
-      line-height: 1.58;
-      margin: 0 0 34px;
-    }
-
-    .hero-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .hero-tags span {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      left: -27px;
+      top: 50%;
+      width: 7px;
+      height: 7px;
       border-radius: var(--radius-full);
-      padding: 9px 15px;
-      color: var(--text-primary);
-      font-size: 15px;
-      font-weight: 700;
-      box-shadow: var(--shadow-sm);
+      background: var(--text-tertiary);
+      transform: translateY(-50%);
     }
 
-    [data-theme="dark"] .hero-tags span {
-      background: var(--bg-elevated);
+    .toc-links a:hover {
+      color: var(--accent);
+      text-decoration: none;
     }
 
-    .byline {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 28px;
-      color: var(--text-secondary);
-      font-size: 15px;
+    .toc-links a:hover::before {
+      background: var(--accent);
     }
 
-    .byline-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #9333EA, #9333EA);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: 700;
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-
-    .byline-name {
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .byline-sep {
-      color: var(--text-tertiary);
-    }
-
-    .byline-date {
-      color: var(--text-secondary);
-    }
-
-    /* ── Main Layout ──────────────────────────── */
-    main {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 52px 28px 96px;
-    }
-
-    article {
-      background: transparent;
-    }
-
+    /* ── Section Spacing ─────────────────────── */
     section {
       margin: 0 0 74px;
       scroll-margin-top: 28px;
     }
 
-    /* ── Table of Contents ────────────────────── */
-    .toc {
-      margin: 0 0 54px;
-      padding: 22px;
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      background: var(--bg-card);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .toc-head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .toc-head span {
-      color: var(--accent);
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .toc-head strong {
-      color: var(--text-secondary);
-      font-size: 15px;
-    }
-
-    .toc-links {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .toc-links a {
-      display: flex;
-      align-items: center;
-      min-height: 44px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: var(--bg-card);
-      padding: 10px 12px;
-      color: var(--text-primary);
-      font-size: 15px;
-      font-weight: 800;
-    }
-
-    .toc-links a:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .toc-links a:last-child {
-      grid-column: 1 / -1;
-    }
-
-    @media (min-width: 1180px) {
-      main {
-        max-width: 1288px;
-        display: grid;
-        grid-template-columns: minmax(0, 940px) 224px;
-        gap: 36px;
-        align-items: start;
-      }
-
-      article {
-        grid-column: 1;
-        grid-row: 1;
-      }
-
-      .toc {
-        grid-column: 2;
-        grid-row: 1;
-        position: sticky;
-        top: 72px;
-        width: auto;
-        max-height: calc(100vh - 128px);
-        overflow: auto;
-        margin: 0;
-        padding: 8px 0 8px 22px;
-        border: 0;
-        border-left: 1px solid var(--border);
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-      }
-
-      .toc-head {
-        display: block;
-        margin-bottom: 16px;
-      }
-
-      .toc-head span {
-        display: block;
-        color: var(--accent);
-        font-size: 13px;
-        letter-spacing: 0.08em;
-      }
-
-      .toc-head strong {
-        display: block;
-        margin-top: 5px;
-        font-size: 13px;
-        line-height: 1.45;
-        font-weight: 700;
-      }
-
-      .toc-links {
-        grid-template-columns: 1fr;
-        gap: 2px;
-      }
-
-      .toc-links a {
-        position: relative;
-        min-height: 0;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        padding: 8px 0 8px 16px;
-        color: var(--text-secondary);
-        font-size: 14px;
-        font-weight: 700;
-        line-height: 1.35;
-      }
-
-      .toc-links a::before {
-        content: "";
-        position: absolute;
-        left: -27px;
-        top: 50%;
-        width: 7px;
-        height: 7px;
-        border-radius: var(--radius-full);
-        background: var(--text-tertiary);
-        transform: translateY(-50%);
-      }
-
-      .toc-links a:hover {
-        color: var(--accent);
-        text-decoration: none;
-      }
-
-      .toc-links a:hover::before {
-        background: var(--accent);
-      }
-
-      .toc-links a:last-child {
-        grid-column: auto;
-      }
-    }
-
-    /* ── Typography ───────────────────────────── */
+    /* ── Typography Overrides ────────────────── */
     h2 {
       margin: 0 0 22px;
       font-size: clamp(30px, 4vw, 44px);
@@ -874,32 +655,6 @@
 
     /* ── Responsive ───────────────────────────── */
     @media (max-width: 860px) {
-      .hero {
-        min-height: 560px;
-      }
-
-      .hero::before {
-        background-image:
-          linear-gradient(180deg, rgba(250, 250, 250, 0.98) 0%, rgba(250, 250, 250, 0.9) 56%, rgba(250, 250, 250, 0.35) 100%),
-          url("./agent-boundary-visuals/cover-background-ai-engineering.png");
-        background-position: center right;
-      }
-
-      [data-theme="dark"] .hero::before {
-        background-image:
-          linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.9) 56%, rgba(10, 10, 10, 0.35) 100%),
-          url("./agent-boundary-visuals/cover-background-ai-engineering.png");
-        background-position: center right;
-      }
-
-      .subtitle {
-        font-size: 20px;
-      }
-
-      .hero-inner {
-        padding: 84px 22px 76px;
-      }
-
       .two-col,
       .process-row,
       .module-grid,
@@ -948,7 +703,7 @@
 <body>
   <header class="site-header">
     <div class="site-header-inner">
-      <a href="./index.html" class="site-logo"><span>zixuan</span>'s blog</a>
+      <a href="./index.html" class="site-logo">zixuan</a>
       <nav class="site-nav">
         <a href="./index.html">Home</a>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
@@ -964,12 +719,10 @@
     </div>
   </header>
 
-  <header class="hero">
+  <header class="article-hero">
     <div class="hero-inner">
       <h1>复杂工程里的 AI Agent：如何解决验证难题</h1>
-      <p class="subtitle">
-        AI 写代码越来越快，但复杂工程真正卡住的地方往往不是"写不出来"，而是"怎么证明它写对了"。
-      </p>
+      <p class="subtitle">AI 写代码越来越快，但复杂工程真正卡住的地方往往不是"写不出来"，而是"怎么证明它写对了"。</p>
       <div class="hero-tags">
         <span>复杂工程</span>
         <span>验证拆层</span>
@@ -985,24 +738,26 @@
     </div>
   </header>
 
-  <main>
-    <nav class="toc" aria-label="文章目录">
-      <div class="toc-head">
-        <span>目录</span>
-        <strong>从验证困境，到证据闭环</strong>
-      </div>
-      <div class="toc-links">
-        <a href="#why-hard">1. 验证为什么难</a>
-        <a href="#layered-evidence">2. 逐层交付证据</a>
-        <a href="#verification-assets">3. 拆成可交付资产</a>
-        <a href="#agent-task-loop">4. 改写成实现 + 证据</a>
-        <a href="#streaming-case">5. 流式能力真实场景</a>
-        <a href="#evidence-engineering">6. 证据工程化</a>
-        <a href="#conclusion">结尾. 验证能力是地基</a>
-      </div>
-    </nav>
+  <div class="article-layout">
+    <aside class="article-toc" aria-label="文章目录">
+      <nav class="toc">
+        <div class="toc-head">
+          <span>目录</span>
+          <strong>从验证困境，到证据闭环</strong>
+        </div>
+        <div class="toc-links">
+          <a href="#why-hard">1. 验证为什么难</a>
+          <a href="#layered-evidence">2. 逐层交付证据</a>
+          <a href="#verification-assets">3. 拆成可交付资产</a>
+          <a href="#agent-task-loop">4. 改写成实现 + 证据</a>
+          <a href="#streaming-case">5. 流式能力真实场景</a>
+          <a href="#evidence-engineering">6. 证据工程化</a>
+          <a href="#conclusion">结尾. 验证能力是地基</a>
+        </div>
+      </nav>
+    </aside>
 
-    <article>
+    <main class="article-content">
       <section>
         <p class="lead">
           过去我们讨论 AI Agent，容易把重点放在"它能不能写代码"。但真正进入复杂工程后，我发现更关键的问题是：<strong>它写完以后，我们怎么证明这件事真的可用？</strong>
@@ -1472,7 +1227,11 @@
         <p><a href="https://developers.openai.com/codex/guides/agents-md">OpenAI Codex AGENTS.md</a>：项目级指令和目录级覆盖规则。</p>
         <p><a href="https://code.claude.com/docs/en/best-practices">Claude Code Best Practices</a>：探索、计划、实现和可运行验证的 Agent 实践。</p>
       </section>
-    </article>
-  </main>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2025 zixuan
+  </footer>
 </body>
 </html>

@@ -1,135 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>如何设计测试 Agent：Harness 自测体系的架构方法</title>
   <link rel="stylesheet" href="shared.css" />
   <style>
-    /* ── Article Layout ─────────────────────── */
-    .doc-shell {
-      max-width: 1440px;
-      margin: 0 auto;
-      padding: 32px 24px 72px;
-      display: grid;
-      grid-template-columns: 260px minmax(0, 1fr);
-      gap: 24px;
-      align-items: start;
-    }
-    .side-toc {
-      position: sticky;
-      top: 24px;
-      max-height: calc(100vh - 48px);
-      overflow: auto;
-      padding: 8px 0 24px;
-    }
-    .toc-card {
-      position: relative;
-      border: none;
-      background: transparent;
-      border-radius: 0;
-      padding: 18px 8px 18px 18px;
-      box-shadow: none;
-      animation: tocEnter 420ms ease-out both;
-    }
-    .toc-card::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 22px;
-      bottom: 22px;
-      width: 2px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, var(--svg-blue), var(--svg-teal), var(--svg-amber));
-    }
-    .toc-kicker {
-      margin: 0 0 12px;
-      color: var(--text-secondary);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0;
-    }
-    .toc-title {
-      margin: 0 0 14px;
-      font-size: 18px;
-      line-height: 1.35;
-      font-weight: 800;
-      color: var(--text-primary);
-    }
-    .page {
-      min-width: 0;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* ── Hero ────────────────────────────────── */
-    .hero {
+    /* ── Hero overrides ──────────────────────── */
+    .article-hero {
       min-height: 680px;
-      position: relative;
-      overflow: hidden;
-      background: var(--bg-base);
-      display: flex;
       align-items: center;
       border-bottom: 1px solid var(--border-subtle);
     }
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
+
+    .article-hero::before {
       background:
         radial-gradient(ellipse 50% 80% at 20% 0%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 60% at 80% 20%, color-mix(in srgb, #9333EA 5%, transparent) 0%, transparent 70%),
-        linear-gradient(90deg, color-mix(in srgb, var(--bg-card) 98%, transparent) 0%, color-mix(in srgb, var(--bg-card) 88%, transparent) 36%, color-mix(in srgb, var(--bg-card) 18%, transparent) 68%),
+        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(147, 51, 234, 0.05) 0%, transparent 70%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.86) 36%, rgba(255, 255, 255, 0.18) 68%),
         url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
       background-size: cover;
       background-position: center;
       transform: scale(1.01);
     }
+
+    [data-theme="dark"] .article-hero::before {
+      background:
+        radial-gradient(ellipse 50% 80% at 20% 0%, color-mix(in srgb, var(--accent) 8%, transparent) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(147, 51, 234, 0.08) 0%, transparent 70%),
+        linear-gradient(90deg, rgba(10, 10, 10, 0.97) 0%, rgba(10, 10, 10, 0.86) 36%, rgba(10, 10, 10, 0.18) 68%),
+        url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
+      background-size: cover;
+      background-position: center;
+    }
+
     .hero-inner {
-      position: relative;
       max-width: 1180px;
-      width: 100%;
-      margin: 0 auto;
       padding: 116px 28px 104px;
     }
-    h1 {
+
+    .article-hero h1 {
       max-width: 760px;
-      margin: 0 0 24px;
       font-size: clamp(42px, 7vw, 82px);
       line-height: 1.04;
       letter-spacing: 0;
       color: var(--text-primary);
     }
-    .subtitle {
+
+    .article-hero .subtitle {
       max-width: 700px;
-      color: var(--text-secondary);
       font-size: 25px;
       line-height: 1.58;
-      margin: 0 0 34px;
-    }
-    .hero-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .hero-tags span {
-      background: color-mix(in srgb, var(--bg-card) 74%, transparent);
-      border: 1px solid color-mix(in srgb, var(--text-primary) 10%, transparent);
-      border-radius: 999px;
-      padding: 9px 15px;
       color: var(--text-secondary);
+    }
+
+    .article-hero .hero-tags span {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 9px 15px;
+      color: var(--text-primary);
       font-size: 15px;
       font-weight: 700;
-      box-shadow: 0 10px 30px color-mix(in srgb, var(--text-primary) 6%, transparent);
+      box-shadow: var(--shadow-sm);
     }
-    .byline {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+
+    [data-theme="dark"] .article-hero .hero-tags span {
+      background: var(--bg-elevated);
+    }
+
+    .article-hero .byline {
       margin-top: 28px;
-      color: var(--text-secondary);
       font-size: 15px;
     }
+
     .byline-avatar {
       width: 36px;
       height: 36px;
@@ -143,18 +87,52 @@
       font-size: 14px;
       flex-shrink: 0;
     }
+
     .byline-name {
       font-weight: 600;
       color: var(--text-primary);
     }
+
     .byline-sep {
       color: var(--text-tertiary);
     }
+
     .byline-date {
       color: var(--text-secondary);
     }
 
-    /* ── Sections ────────────────────────────── */
+    /* ── TOC head / links ─────────────────────── */
+    .toc-head {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .toc-head span {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .toc-head strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .toc-links {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* ── Sections ─────────────────────────────── */
     section {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -162,112 +140,56 @@
       margin-top: 18px;
       padding: 32px 36px;
     }
-    h2 {
+
+    .article-content section h2 {
       margin: 0 0 16px;
       font-size: 26px;
       line-height: 1.32;
-      letter-spacing: 0;
-      color: var(--text-primary);
     }
-    h3 {
+
+    .article-content section h3 {
       margin: 28px 0 10px;
       font-size: 19px;
-      letter-spacing: 0;
-      color: var(--text-primary);
     }
-    p { margin: 12px 0; color: var(--text-primary); }
-    strong { color: var(--text-primary); }
+
     .lead {
       font-size: 17px;
       color: var(--text-secondary);
     }
-    .meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 24px;
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
-    .pill {
-      border: 1px solid var(--border);
-      background: var(--bg-elevated);
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
 
-    /* ── TOC Navigation ──────────────────────── */
-    .toc {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .toc a {
-      position: relative;
-      color: var(--text-secondary);
-      text-decoration: none;
-      border: 1px solid transparent;
-      padding: 8px 10px 8px 16px;
-      border-radius: 6px;
-      background: transparent;
-      font-size: 13px;
-      line-height: 1.35;
-      transition: transform 180ms ease, color 180ms ease, background-color 180ms ease, border-color 180ms ease;
-    }
-    .toc a::before {
-      content: "";
-      position: absolute;
-      left: 5px;
-      top: 50%;
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--svg-blue-mid);
-      transform: translateY(-50%);
-      transition: background-color 180ms ease, box-shadow 180ms ease;
-    }
-    .toc a:hover {
-      color: var(--accent);
-      background: var(--accent-soft);
-      border-color: var(--svg-blue-mid);
-      transform: translateX(4px);
-    }
-    .toc a:hover::before {
-      background: var(--accent);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 10%, transparent);
-    }
-    @keyframes tocEnter {
-      from { transform: translateX(-10px); }
-      to { transform: translateX(0); }
-    }
-
-    /* ── Grids & Cards ───────────────────────── */
+    /* ── Grids & Cards ────────────────────────── */
     .grid-2 {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 14px;
     }
+
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
     }
+
     .card {
       border: 1px solid var(--border);
       background: var(--bg-elevated);
       border-radius: 6px;
       padding: 16px;
     }
+
     .card h3 {
       margin-top: 0;
       font-size: 17px;
     }
+
+    /* ── Visual Grid ──────────────────────────── */
     .visual-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 12px;
       margin: 18px 0;
     }
+
     .visual-card {
       border: 1px solid var(--border);
       background: linear-gradient(180deg, var(--bg-card) 0%, var(--svg-bg) 100%);
@@ -275,22 +197,27 @@
       padding: 14px;
       min-height: 150px;
     }
+
     .visual-card svg {
       display: block;
       width: 54px;
       height: 54px;
       margin-bottom: 10px;
     }
+
     .visual-card h3 {
       margin: 0 0 8px;
       font-size: 16px;
     }
+
     .visual-card p {
       margin: 0;
       color: var(--text-secondary);
       font-size: 13px;
       line-height: 1.5;
     }
+
+    /* ── Mini Flow ────────────────────────────── */
     .mini-flow {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -298,6 +225,7 @@
       margin: 18px 0;
       align-items: stretch;
     }
+
     .mini-step {
       border: 1px solid var(--border);
       background: var(--bg-card);
@@ -306,6 +234,7 @@
       position: relative;
       min-height: 108px;
     }
+
     .mini-step::after {
       content: "";
       position: absolute;
@@ -315,12 +244,15 @@
       height: 2px;
       background: var(--svg-blue-mid);
     }
+
     .mini-step:last-child::after { display: none; }
+
     .mini-step b {
       display: block;
       margin-bottom: 6px;
       color: var(--text-primary);
     }
+
     .mini-step span {
       display: block;
       color: var(--text-secondary);
@@ -328,7 +260,7 @@
       line-height: 1.45;
     }
 
-    /* ── SVG Diagrams ────────────────────────── */
+    /* ── SVG Diagrams ─────────────────────────── */
     .svg-panel {
       border: 1px solid var(--svg-border);
       background: linear-gradient(180deg, var(--svg-card) 0%, var(--svg-bg) 100%);
@@ -337,57 +269,66 @@
       overflow-x: auto;
       box-shadow: var(--shadow-lg);
     }
+
     .svg-diagram {
       display: block;
       width: 100%;
       min-width: 920px;
       height: auto;
     }
+
     .svg-title {
       font: 700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       fill: var(--svg-text);
     }
+
     .svg-subtitle {
       font: 500 13px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       fill: var(--svg-text-secondary);
     }
+
     .svg-label {
       font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       fill: var(--svg-text);
     }
+
     .svg-small {
       font: 500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       fill: var(--svg-text-secondary);
     }
+
     .svg-chip {
       font: 700 11px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       fill: var(--svg-text);
     }
+
     .svg-lane {
       font: 700 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
       fill: var(--svg-text-secondary);
       letter-spacing: 0;
     }
 
-    /* ── Table ───────────────────────────────── */
+    /* ── Table ────────────────────────────────── */
     table {
       width: 100%;
       border-collapse: collapse;
       margin: 16px 0;
       font-size: 14px;
     }
+
     th, td {
       border: 1px solid var(--border);
       padding: 10px 12px;
       text-align: left;
       vertical-align: top;
     }
+
     th {
       background: var(--bg-elevated);
       font-weight: 700;
     }
 
-    /* ── Code ────────────────────────────────── */
+    /* ── Code overrides ───────────────────────── */
     code {
       background: var(--bg-elevated);
       color: var(--text-primary);
@@ -396,6 +337,7 @@
       font-family: var(--font-mono);
       font-size: 0.92em;
     }
+
     pre {
       overflow: auto;
       background: var(--bg-sunken);
@@ -406,13 +348,14 @@
       font-size: 13px;
       line-height: 1.55;
     }
+
     pre code {
       background: transparent;
       color: inherit;
       padding: 0;
     }
 
-    /* ── Callouts ────────────────────────────── */
+    /* ── Callouts ─────────────────────────────── */
     .callout {
       border-left: 4px solid var(--accent);
       background: var(--accent-soft);
@@ -420,52 +363,63 @@
       margin: 18px 0;
       border-radius: 0 var(--radius-md) var(--radius-md) 0;
     }
+
     .callout.ok {
       border-left-color: var(--success);
       background: color-mix(in srgb, var(--success) 8%, var(--bg-card));
     }
+
     .callout.warn {
       border-left-color: var(--warning);
       background: color-mix(in srgb, var(--warning) 8%, var(--bg-card));
     }
+
     .callout.risk {
       border-left-color: var(--error);
       background: color-mix(in srgb, var(--error) 8%, var(--bg-card));
     }
 
-    /* ── Tags ────────────────────────────────── */
+    /* ── Tags ─────────────────────────────────── */
     ul, ol { padding-left: 22px; }
     li { margin: 6px 0; }
     .tag-ok { color: var(--success); font-weight: 700; }
     .tag-warn { color: var(--warning); font-weight: 700; }
     .tag-risk { color: var(--error); font-weight: 700; }
 
-    /* ── Responsive ──────────────────────────── */
+    /* ── Responsive ───────────────────────────── */
     @media (max-width: 760px) {
-      .doc-shell {
-        grid-template-columns: 1fr;
-        padding: 24px 16px 56px;
-      }
-      .side-toc {
-        position: static;
-        max-height: none;
-      }
-      .hero {
+      .article-hero {
         min-height: 560px;
       }
-      .hero::before {
+
+      .article-hero::before {
         background-image:
-          linear-gradient(180deg, color-mix(in srgb, var(--bg-base) 98%, transparent) 0%, color-mix(in srgb, var(--bg-base) 90%, transparent) 56%, color-mix(in srgb, var(--bg-base) 35%, transparent) 100%),
+          linear-gradient(180deg, rgba(250, 250, 250, 0.98) 0%, rgba(250, 250, 250, 0.9) 56%, rgba(250, 250, 250, 0.35) 100%),
           url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
         background-position: center right;
       }
+
+      [data-theme="dark"] .article-hero::before {
+        background-image:
+          linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.9) 56%, rgba(10, 10, 10, 0.35) 100%),
+          url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
+        background-position: center right;
+      }
+
       .hero-inner {
         padding: 84px 22px 76px;
       }
+
+      .article-hero h1 {
+        font-size: 38px;
+      }
+
+      .article-hero .subtitle {
+        font-size: 20px;
+      }
+
       section { padding: 24px; }
-      h1 { font-size: 38px; }
-      .subtitle { font-size: 20px; }
-      .toc, .grid-2, .grid-3, .visual-grid, .mini-flow { grid-template-columns: 1fr; }
+      .grid-2, .grid-3, .visual-grid, .mini-flow { grid-template-columns: 1fr; }
       .mini-step::after { display: none; }
     }
   </style>
@@ -474,7 +428,7 @@
 <body>
   <header class="site-header">
     <div class="site-header-inner">
-      <a href="./index.html" class="site-logo"><span>zixuan</span>'s blog</a>
+      <a href="./index.html" class="site-logo">zixuan</a>
       <nav class="site-nav">
         <a href="./index.html">Home</a>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
@@ -490,7 +444,7 @@
     </div>
   </header>
 
-  <header class="hero">
+  <header class="article-hero">
     <div class="hero-inner">
       <h1>测试 Agent 架构方法</h1>
       <p class="subtitle">
@@ -505,18 +459,20 @@
       <div class="byline">
         <div class="byline-avatar">Z</div>
         <span class="byline-name">zixuan</span>
-        <span class="byline-sep">·</span>
+        <span class="byline-sep">&middot;</span>
         <span class="byline-date">2025 年 6 月</span>
       </div>
     </div>
   </header>
 
-  <div class="doc-shell">
-    <aside class="side-toc" aria-label="文章目录">
-      <div class="toc-card">
-        <p class="toc-kicker">TECH SHARE</p>
-        <p class="toc-title">测试 Agent 架构方法</p>
-        <nav class="toc">
+  <div class="article-layout">
+    <aside class="article-toc" aria-label="文章目录">
+      <nav class="toc">
+        <div class="toc-head">
+          <span>目录</span>
+          <strong>测试 Agent 架构方法</strong>
+        </div>
+        <div class="toc-links">
           <a href="#one-line">1. 先定义测试 Agent 的职责</a>
           <a href="#why">2. 为什么它要放在 Harness 里</a>
           <a href="#p2p-limit">3. 为什么不直接 P2P 测试</a>
@@ -527,11 +483,11 @@
           <a href="#av">8. 音视频业务验证如何落地</a>
           <a href="#harness-map">9. 如何融入当前 Harness 流程</a>
           <a href="#status">10. 当前能力边界</a>
-        </nav>
-      </div>
+        </div>
+      </nav>
     </aside>
 
-    <main class="page">
+    <main class="article-content">
     <section id="one-line">
       <h2>1. 先定义测试 Agent 的职责</h2>
       <p class="lead">
@@ -997,7 +953,7 @@
           <path d="M829 526 V458 H396 V416" stroke="var(--svg-blue)" stroke-width="2.4" fill="none" marker-end="url(#arrowBlue)" />
 
           <rect x="74" y="604" width="934" height="24" rx="12" fill="var(--bg-elevated)" stroke="var(--svg-border)" />
-          <text x="96" y="621" class="svg-small">设计约束：工具最小权限 · 证据先行 · 本地判断前置 · Agent 诊断收敛到结构化报告</text>
+          <text x="96" y="621" class="svg-small">设计约束：工具最小权限 &middot; 证据先行 &middot; 本地判断前置 &middot; Agent 诊断收敛到结构化报告</text>
         </svg>
       </div>
       <p>
@@ -1017,13 +973,13 @@
         搭建时不要从"写一个大 prompt"开始，而要先把 Agent 运行所需的外壳搭好：输入契约决定它验证什么，工具契约决定它能做什么，证据仓决定它能留下什么，Evaluator 决定哪些判断不需要模型参与，输出 schema 决定团队如何消费结果。
       </p>
       <pre><code>receive test intent
-  → build verification plan
-  → check environment and prerequisites
-  → execute Harness actions
-  → store evidence
-  → run deterministic evaluators
-  → diagnose candidate anomalies
-  → submit structured report</code></pre>
+  &rarr; build verification plan
+  &rarr; check environment and prerequisites
+  &rarr; execute Harness actions
+  &rarr; store evidence
+  &rarr; run deterministic evaluators
+  &rarr; diagnose candidate anomalies
+  &rarr; submit structured report</code></pre>
       <div class="svg-panel">
         <svg class="svg-diagram" viewBox="0 0 1060 460" role="img" aria-label="测试 Agent 控制回路图">
           <defs>
@@ -1062,18 +1018,18 @@
             <rect x="100" y="138" width="190" height="94" rx="12" fill="url(#loopAgent)" stroke="var(--svg-blue-mid)" />
             <text x="128" y="166" class="svg-label">Planner Agent</text>
             <text x="128" y="193" class="svg-small">把需求转成验证计划</text>
-            <text x="128" y="214" class="svg-small">场景 · 前置 · 预算</text>
+            <text x="128" y="214" class="svg-small">场景 &middot; 前置 &middot; 预算</text>
             <text x="128" y="233" class="svg-small">停止条件</text>
 
             <rect x="406" y="104" width="220" height="104" rx="12" fill="url(#loopAgent)" stroke="var(--svg-blue-mid)" />
             <text x="438" y="135" class="svg-label">Executor Agent</text>
             <text x="438" y="163" class="svg-small">只通过注册 action 运行系统</text>
-            <text x="438" y="184" class="svg-small">HTTP · RPC · AV · process · wait</text>
+            <text x="438" y="184" class="svg-small">HTTP &middot; RPC &middot; AV &middot; process &middot; wait</text>
 
             <rect x="746" y="138" width="190" height="94" rx="12" fill="var(--svg-purple-bg)" stroke="var(--svg-purple-mid)" />
             <text x="774" y="166" class="svg-label">Diagnosis Agent</text>
             <text x="774" y="193" class="svg-small">解释候选异常</text>
-            <text x="774" y="214" class="svg-small">工具验证 · 置信度 · 建议</text>
+            <text x="774" y="214" class="svg-small">工具验证 &middot; 置信度 &middot; 建议</text>
 
             <rect x="90" y="292" width="208" height="74" rx="12" fill="var(--svg-amber-bg)" stroke="var(--svg-amber-mid)" />
             <text x="122" y="321" class="svg-label">Evaluator Registry</text>
@@ -1081,12 +1037,12 @@
 
             <rect x="394" y="276" width="246" height="98" rx="12" fill="url(#loopData)" stroke="var(--svg-teal-mid)" />
             <text x="432" y="307" class="svg-label">Evidence Store</text>
-            <text x="432" y="335" class="svg-small">响应 · 日志 · 帧 · 片段 · 流包</text>
-            <text x="432" y="356" class="svg-small">工具 trace · 指标 · 证据索引</text>
+            <text x="432" y="335" class="svg-small">响应 &middot; 日志 &middot; 帧 &middot; 片段 &middot; 流包</text>
+            <text x="432" y="356" class="svg-small">工具 trace &middot; 指标 &middot; 证据索引</text>
 
             <rect x="744" y="292" width="208" height="74" rx="12" fill="var(--svg-teal-bg)" stroke="var(--svg-teal-mid)" />
             <text x="782" y="321" class="svg-label">Structured Report</text>
-            <text x="782" y="347" class="svg-small">verdict · dimensions · next steps</text>
+            <text x="782" y="347" class="svg-small">verdict &middot; dimensions &middot; next steps</text>
           </g>
 
           <path d="M290 184 C340 148, 358 138, 402 143" stroke="var(--svg-blue)" stroke-width="2.5" fill="none" marker-end="url(#loopArrow)" />
@@ -1105,7 +1061,7 @@
           <text x="210" y="268" class="svg-small">candidate signals</text>
 
           <rect x="102" y="398" width="854" height="24" rx="12" fill="var(--bg-elevated)" stroke="var(--svg-border)" />
-          <text x="126" y="415" class="svg-small">控制原则：Planner 不伪造执行结果 · Executor 不越权调用 · Diagnosis 不覆盖证据 · Report 保留复查路径</text>
+          <text x="126" y="415" class="svg-small">控制原则：Planner 不伪造执行结果 &middot; Executor 不越权调用 &middot; Diagnosis 不覆盖证据 &middot; Report 保留复查路径</text>
         </svg>
       </div>
       <table>
@@ -1172,11 +1128,11 @@
         当前 capture-tester 中的 `runAnalysisAgent` 更接近 Diagnosis Agent。它的系统提示明确要求"本地检测已经发现异常，重点是根因调查"，并通过 `submit_report` 强制输出结构化报告；工具注册表只提供 frame、video、audio、stream 和可选 code tools。
       </p>
       <pre><code>local anomaly
-  → build system prompt with available tools
-  → choose targeted tool calls
-  → inspect stream/frame/audio/code evidence
-  → call submit_report
-  → merge into session summary</code></pre>
+  &rarr; build system prompt with available tools
+  &rarr; choose targeted tool calls
+  &rarr; inspect stream/frame/audio/code evidence
+  &rarr; call submit_report
+  &rarr; merge into session summary</code></pre>
       <p>
         这种设计的关键是把 Agent 放在"证据之后、报告之前"。它不负责制造事实，只负责把事实组织成可理解、可行动的解释。
       </p>
@@ -1312,12 +1268,12 @@
             <text x="94" y="164" class="svg-label">1. 真实链路取证</text>
             <text x="94" y="192" class="svg-small">HTTP/RPC 创建 session</text>
             <text x="94" y="214" class="svg-small">RTSP / RPC callback 出流</text>
-            <text x="94" y="236" class="svg-small">fMP4 · JPEG · StreamPacket</text>
+            <text x="94" y="236" class="svg-small">fMP4 &middot; JPEG &middot; StreamPacket</text>
 
             <rect x="382" y="132" width="246" height="130" rx="12" fill="var(--svg-amber-bg)" stroke="var(--svg-amber-mid)" />
             <text x="412" y="164" class="svg-label">2. 确定性筛选</text>
-            <text x="412" y="192" class="svg-small">fps · 亮度 · 对比度</text>
-            <text x="412" y="214" class="svg-small">RMS · clipping · memory</text>
+            <text x="412" y="192" class="svg-small">fps &middot; 亮度 &middot; 对比度</text>
+            <text x="412" y="214" class="svg-small">RMS &middot; clipping &middot; memory</text>
             <text x="412" y="236" class="svg-small">只产候选异常</text>
 
             <rect x="700" y="132" width="246" height="130" rx="12" fill="var(--svg-purple-bg)" stroke="var(--svg-purple-mid)" />
@@ -1360,11 +1316,11 @@
         这里最重要的边界是：黑画面、静止画面、静音这类现象不能只靠一个阈值直接解释成缺陷。测试 Agent 要先保留窗口证据，再结合时间段、启动状态、流包、编码信息和代码路径判断它属于场景内容、正常初始化、链路异常，还是实现问题。
       </p>
       <pre><code>create session
-  → collect stream evidence
-  → run local evaluator
-  → if anomaly changes: run diagnosis agent
-  → submit structured report
-  → generate session summary</code></pre>
+  &rarr; collect stream evidence
+  &rarr; run local evaluator
+  &rarr; if anomaly changes: run diagnosis agent
+  &rarr; submit structured report
+  &rarr; generate session summary</code></pre>
     </section>
 
     <section id="harness-map">
@@ -1509,7 +1465,7 @@
           <tr>
             <td>GUI 实时视频分析主链路</td>
             <td><span class="tag-ok">已落地主链路</span></td>
-            <td>`SegmentCapture → LocalDetector → runAnalysisAgent → SessionSummary` 已形成帧窗口分析闭环</td>
+            <td>`SegmentCapture &rarr; LocalDetector &rarr; runAnalysisAgent &rarr; SessionSummary` 已形成帧窗口分析闭环</td>
           </tr>
           <tr>
             <td>音频指标链路</td>
@@ -1544,10 +1500,14 @@
         capture-service-harness 的经验说明，这套架构尤其适合音视频这种强运行态、强业务语义的项目。只要证据链、工具边界和输出 schema 设计清楚，测试 Agent 就能从一次性的对话助手，变成团队可复用的工程基础设施。
       </p>
       <div class="callout ok">
-        <strong>最终目标：</strong>团队不只是拥有一个会跑测试的工具，而是拥有一套"需求变更 → 验证计划 → 真实运行 → 证据采集 → 工具诊断 → 可复查报告"的 Agent 化自测体系。
+        <strong>最终目标：</strong>团队不只是拥有一个会跑测试的工具，而是拥有一套"需求变更 &rarr; 验证计划 &rarr; 真实运行 &rarr; 证据采集 &rarr; 工具诊断 &rarr; 可复查报告"的 Agent 化自测体系。
       </div>
     </section>
     </main>
   </div>
+
+  <footer class="site-footer">
+    &copy; 2025 zixuan
+  </footer>
 </body>
 </html>
