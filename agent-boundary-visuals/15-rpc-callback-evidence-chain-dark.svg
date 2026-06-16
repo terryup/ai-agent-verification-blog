@@ -1,0 +1,99 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-15%" y="-18%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#000000" flood-opacity="0.10"/>
+    </filter>
+    <linearGradient id="hero" x1="70" y1="150" x2="1530" y2="810" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D1F3D"/>
+      <stop offset="0.55" stop-color="#1E1E32"/>
+      <stop offset="1" stop-color="#0D2818"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="900" rx="28" fill="#1A1A2E"/>
+  <g font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="72" y="82" fill="#E8E8F0" font-size="38" font-weight="900">STREAM_CALLBACK 证据链怎么收敛？</text>
+    <text x="74" y="124" fill="#8899AA" font-size="21">不要证明“接口写了”，而是证明每个关键节点都有可回传的证据。</text>
+
+    <g filter="url(#shadow)">
+      <rect x="70" y="164" width="1460" height="650" rx="34" fill="url(#hero)" stroke="#2A2A3E"/>
+    </g>
+
+    <rect x="106" y="210" width="244" height="130" rx="24" fill="#E8E8F0"/>
+    <text x="132" y="256" fill="#1E1E32" font-size="25" font-weight="900">验收口径</text>
+    <text x="132" y="294" fill="#333348" font-size="17">失败时不说“流不通”</text>
+    <text x="132" y="324" fill="#333348" font-size="17">而是定位到具体节点</text>
+
+    <rect x="384" y="220" width="1170" height="82" rx="26" fill="#1E1E32" stroke="#333348"/>
+    <text x="424" y="254" fill="#1D4ED8" font-size="19" font-weight="900">主线</text>
+    <text x="424" y="280" fill="#8899AA" font-size="16">CreateStreamSession(STREAM_CALLBACK) → SubscribeStream → sink 挂载 → packet 进入 → StreamPacket 推送 → 断连 / 销毁回落</text>
+
+    <line x1="222" y1="446" x2="1396" y2="446" stroke="#333348" stroke-width="4"/>
+    <path d="M222 446 H1318" stroke="#2563EB" stroke-width="6" stroke-linecap="round" stroke-dasharray="1 78"/>
+    <polygon points="1318,418 1350,446 1318,474" fill="#2563EB"/>
+
+    <g>
+      <circle cx="222" cy="446" r="34" fill="#132D5E" stroke="#2563EB" stroke-width="3"/>
+      <text x="222" y="455" text-anchor="middle" fill="#1D4ED8" font-size="25" font-weight="900">1</text>
+      <rect x="120" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#BFDBFE"/>
+      <text x="222" y="536" text-anchor="middle" fill="#1D4ED8" font-size="20" font-weight="900">创建会话</text>
+      <text x="222" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">CreateStreamSession</text>
+      <text x="222" y="598" text-anchor="middle" fill="#8899AA" font-size="15">session_id</text>
+      <text x="222" y="624" text-anchor="middle" fill="#8899AA" font-size="15">protocol=STREAM_CALLBACK</text>
+    </g>
+
+    <g>
+      <circle cx="456" cy="446" r="34" fill="#132D5E" stroke="#2563EB" stroke-width="3"/>
+      <text x="456" y="455" text-anchor="middle" fill="#1D4ED8" font-size="25" font-weight="900">2</text>
+      <rect x="354" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#BFDBFE"/>
+      <text x="456" y="536" text-anchor="middle" fill="#1D4ED8" font-size="20" font-weight="900">建立订阅</text>
+      <text x="456" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">SubscribeStream</text>
+      <text x="456" y="598" text-anchor="middle" fill="#8899AA" font-size="15">trace_id</text>
+      <text x="456" y="624" text-anchor="middle" fill="#8899AA" font-size="15">绑定 session_id</text>
+    </g>
+
+    <g>
+      <circle cx="690" cy="446" r="34" fill="#134E30" stroke="#0F766E" stroke-width="3"/>
+      <text x="690" y="455" text-anchor="middle" fill="#0F766E" font-size="25" font-weight="900">3</text>
+      <rect x="588" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#10B981"/>
+      <text x="690" y="536" text-anchor="middle" fill="#0F766E" font-size="20" font-weight="900">挂载 Sink</text>
+      <text x="690" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">Register / Attach</text>
+      <text x="690" y="598" text-anchor="middle" fill="#8899AA" font-size="15">sink_count +1</text>
+      <text x="690" y="624" text-anchor="middle" fill="#8899AA" font-size="15">挂到 StreamSession</text>
+    </g>
+
+    <g>
+      <circle cx="924" cy="446" r="34" fill="#134E30" stroke="#0F766E" stroke-width="3"/>
+      <text x="924" y="455" text-anchor="middle" fill="#0F766E" font-size="25" font-weight="900">4</text>
+      <rect x="822" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#10B981"/>
+      <text x="924" y="536" text-anchor="middle" fill="#0F766E" font-size="20" font-weight="900">Packet 进入</text>
+      <text x="924" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">StreamSink</text>
+      <text x="924" y="598" text-anchor="middle" fill="#8899AA" font-size="15">seq / timestamp</text>
+      <text x="924" y="624" text-anchor="middle" fill="#8899AA" font-size="15">fake source 可复跑</text>
+    </g>
+
+    <g>
+      <circle cx="1158" cy="446" r="34" fill="#4A3408" stroke="#B45309" stroke-width="3"/>
+      <text x="1158" y="455" text-anchor="middle" fill="#B45309" font-size="25" font-weight="900">5</text>
+      <rect x="1056" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#F59E0B"/>
+      <text x="1158" y="536" text-anchor="middle" fill="#B45309" font-size="20" font-weight="900">Stream 推送</text>
+      <text x="1158" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">RPC stream</text>
+      <text x="1158" y="598" text-anchor="middle" fill="#8899AA" font-size="15">client_received</text>
+      <text x="1158" y="624" text-anchor="middle" fill="#8899AA" font-size="15">packet_count</text>
+    </g>
+
+    <g>
+      <circle cx="1392" cy="446" r="34" fill="#2D0A0A" stroke="#B91C1C" stroke-width="3"/>
+      <text x="1392" y="455" text-anchor="middle" fill="#B91C1C" font-size="25" font-weight="900">6</text>
+      <rect x="1290" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#EF4444"/>
+      <text x="1392" y="536" text-anchor="middle" fill="#B91C1C" font-size="20" font-weight="900">断连回落</text>
+      <text x="1392" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">Cancel / Destroy</text>
+      <text x="1392" y="598" text-anchor="middle" fill="#8899AA" font-size="15">EOF</text>
+      <text x="1392" y="624" text-anchor="middle" fill="#8899AA" font-size="15">resource_count 回落</text>
+    </g>
+
+    <rect x="266" y="708" width="1068" height="64" rx="32" fill="#E8E8F0"/>
+    <text x="800" y="733" text-anchor="middle" fill="#1E1E32" font-size="18" font-weight="900">回喂给 Agent 的不是一句失败描述，而是节点级证据</text>
+    <text x="800" y="760" text-anchor="middle" fill="#333348" font-size="15">例如：session 已创建、sink 已挂载、StreamSink 收到 3 个包，但客户端没有收到 StreamPacket</text>
+  </g>
+</svg>

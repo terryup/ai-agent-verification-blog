@@ -1,0 +1,86 @@
+<svg width="1400" height="760" viewBox="0 0 1400 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="soft-shadow" x="-15%" y="-20%" width="130%" height="145%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#000000" flood-opacity="0.10"/>
+    </filter>
+    <linearGradient id="local-bg" x1="96" y1="188" x2="540" y2="626" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D1F3D"/>
+      <stop offset="1" stop-color="#1E1E32"/>
+    </linearGradient>
+    <linearGradient id="real-bg" x1="860" y1="188" x2="1304" y2="626" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D2818"/>
+      <stop offset="1" stop-color="#1E1E32"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1400" height="760" rx="28" fill="#1A1A2E"/>
+  <g font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="70" y="78" fill="#E8E8F0" font-size="36" font-weight="900">从本地可证，到真实环境可验</text>
+    <text x="72" y="118" fill="#8899AA" font-size="20">不要换一套验证思路。让 Agent 先造工具，再把同一套工具接到真实环境拿证据。</text>
+
+    <g filter="url(#soft-shadow)">
+      <rect x="86" y="178" width="472" height="448" rx="30" fill="url(#local-bg)" stroke="#BFDBFE"/>
+      <rect x="842" y="178" width="472" height="448" rx="30" fill="url(#real-bg)" stroke="#A7F3D0"/>
+      <rect x="600" y="258" width="200" height="250" rx="28" fill="#1E1E32" stroke="#333348"/>
+    </g>
+
+    <rect x="118" y="214" width="92" height="34" rx="17" fill="#132D5E"/>
+    <text x="164" y="237" text-anchor="middle" fill="#1D4ED8" font-size="15" font-weight="900">阶段 1</text>
+    <text x="118" y="286" fill="#1D4ED8" font-size="30" font-weight="900">本地验证器</text>
+    <text x="118" y="322" fill="#8899AA" font-size="17">先证明逻辑链路，不碰真实设备</text>
+
+    <rect x="126" y="360" width="176" height="58" rx="16" fill="#1E1E32" stroke="#2563EB"/>
+    <text x="214" y="396" text-anchor="middle" fill="#1D4ED8" font-size="18" font-weight="900">契约生成</text>
+    <rect x="342" y="360" width="176" height="58" rx="16" fill="#1E1E32" stroke="#5EEAD4"/>
+    <text x="430" y="396" text-anchor="middle" fill="#0F766E" font-size="18" font-weight="900">fake 数据源</text>
+    <rect x="126" y="442" width="176" height="58" rx="16" fill="#1E1E32" stroke="#F59E0B"/>
+    <text x="214" y="478" text-anchor="middle" fill="#B45309" font-size="18" font-weight="900">最小闭环</text>
+    <rect x="342" y="442" width="176" height="58" rx="16" fill="#1E1E32" stroke="#EF4444"/>
+    <text x="430" y="478" text-anchor="middle" fill="#B91C1C" font-size="18" font-weight="900">断连清理</text>
+
+    <rect x="126" y="538" width="392" height="44" rx="22" fill="#0D1F3D"/>
+    <text x="322" y="566" text-anchor="middle" fill="#BFDBFE" font-size="17" font-weight="900">输出：可复跑脚本 + 结构化证据样例</text>
+
+    <text x="700" y="310" text-anchor="middle" fill="#E8E8F0" font-size="22" font-weight="900">同一个</text>
+    <text x="700" y="342" text-anchor="middle" fill="#2563EB" font-size="25" font-weight="900">probe</text>
+    <text x="700" y="374" text-anchor="middle" fill="#E8E8F0" font-size="22" font-weight="900">继续跑</text>
+    <line x1="638" y1="406" x2="762" y2="406" stroke="#333348" stroke-width="2"/>
+    <text x="700" y="438" text-anchor="middle" fill="#8899AA" font-size="16">只替换参数</text>
+    <text x="700" y="466" text-anchor="middle" fill="#8899AA" font-size="16">endpoint</text>
+    <text x="700" y="492" text-anchor="middle" fill="#8899AA" font-size="16">device / session</text>
+
+    <line x1="558" y1="372" x2="576" y2="372" stroke="#2563EB" stroke-width="5" stroke-linecap="round"/>
+    <polygon points="576,352 600,372 576,392" fill="#2563EB"/>
+    <line x1="800" y1="372" x2="818" y2="372" stroke="#2563EB" stroke-width="5" stroke-linecap="round"/>
+    <polygon points="818,352 842,372 818,392" fill="#2563EB"/>
+    <text x="700" y="224" text-anchor="middle" fill="#2563EB" font-size="18" font-weight="900">带着验证资产进入真实环境</text>
+
+    <rect x="874" y="214" width="92" height="34" rx="17" fill="#134E30"/>
+    <text x="920" y="237" text-anchor="middle" fill="#0F766E" font-size="15" font-weight="900">阶段 2</text>
+    <text x="874" y="286" fill="#0F766E" font-size="30" font-weight="900">真实验收门</text>
+    <text x="874" y="322" fill="#8899AA" font-size="17">用真实依赖证明系统能稳定运行</text>
+
+    <rect x="888" y="356" width="388" height="54" rx="17" fill="#1E1E32" stroke="#333348"/>
+    <circle cx="920" cy="383" r="12" fill="#0F766E"/>
+    <text x="920" y="389" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="900">1</text>
+    <text x="952" y="390" fill="#E8E8F0" font-size="18" font-weight="900">真实数据源 + 测试客户端</text>
+
+    <rect x="888" y="432" width="388" height="54" rx="17" fill="#1E1E32" stroke="#333348"/>
+    <circle cx="920" cy="459" r="12" fill="#0F766E"/>
+    <text x="920" y="465" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="900">2</text>
+    <text x="952" y="466" fill="#E8E8F0" font-size="18" font-weight="900">重连 / 断连 / 多客户端</text>
+
+    <rect x="888" y="508" width="388" height="54" rx="17" fill="#1E1E32" stroke="#333348"/>
+    <circle cx="920" cy="535" r="12" fill="#0F766E"/>
+    <text x="920" y="541" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="900">3</text>
+    <text x="952" y="542" fill="#E8E8F0" font-size="18" font-weight="900">首包 / 丢包 / 队列 / 资源</text>
+
+    <path d="M1040 626 C950 636 462 636 348 642" stroke="#0F766E" stroke-width="5" stroke-linecap="round"/>
+    <polygon points="340,642 372,628 366,660" fill="#0F766E"/>
+    <rect x="474" y="650" width="452" height="46" rx="23" fill="#0D2818" stroke="#10B981"/>
+    <text x="700" y="679" text-anchor="middle" fill="#0F766E" font-size="18" font-weight="900">失败证据回喂 Agent：定位到链路节点再修</text>
+
+    <rect x="280" y="708" width="840" height="34" rx="17" fill="#E8E8F0"/>
+    <text x="700" y="731" text-anchor="middle" fill="#1E1E32" font-size="16" font-weight="900">真实环境不是“最后试一下”，而是同一套验证资产的第二个运行场</text>
+  </g>
+</svg>

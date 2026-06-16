@@ -1,0 +1,79 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-15%" y="-18%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#000000" flood-opacity="0.10"/>
+    </filter>
+    <linearGradient id="hero" x1="70" y1="150" x2="1530" y2="810" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D1F3D"/>
+      <stop offset="0.55" stop-color="#1E1E32"/>
+      <stop offset="1" stop-color="#0D2818"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="900" rx="28" fill="#1A1A2E"/>
+  <g font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif">
+    <text x="72" y="82" fill="#E8E8F0" font-size="38" font-weight="900">下一步：把验证能力产品化</text>
+    <text x="74" y="124" fill="#8899AA" font-size="21">从人提醒 Agent，到系统要求 Agent 提交证据。</text>
+
+    <g filter="url(#shadow)">
+      <rect x="70" y="164" width="1460" height="650" rx="34" fill="url(#hero)" stroke="#2A2A3E"/>
+    </g>
+
+    <rect x="106" y="210" width="244" height="130" rx="24" fill="#E8E8F0"/>
+    <text x="132" y="256" fill="#1E1E32" font-size="25" font-weight="900">平台口径</text>
+    <text x="132" y="294" fill="#333348" font-size="17">不是提醒它补证据</text>
+    <text x="132" y="324" fill="#333348" font-size="17">而是默认必须交付</text>
+
+    <rect x="384" y="220" width="1170" height="82" rx="26" fill="#1E1E32" stroke="#333348"/>
+    <text x="424" y="254" fill="#0F766E" font-size="19" font-weight="900">演进主线</text>
+    <text x="424" y="280" fill="#8899AA" font-size="16">规则层 → 执行层 → 证据层 → 治理层：让证据从“人工提醒”变成“系统要求”</text>
+
+    <line x1="222" y1="446" x2="1396" y2="446" stroke="#333348" stroke-width="4"/>
+    <path d="M222 446 H1318" stroke="#0F766E" stroke-width="6" stroke-linecap="round"/>
+    <polygon points="1318,418 1350,446 1318,474" fill="#0F766E"/>
+
+    <g>
+      <circle cx="222" cy="446" r="34" fill="#134E30" stroke="#0F766E" stroke-width="3"/>
+      <text x="222" y="455" text-anchor="middle" fill="#0F766E" font-size="25" font-weight="900">1</text>
+      <rect x="120" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#10B981"/>
+      <text x="222" y="536" text-anchor="middle" fill="#0F766E" font-size="20" font-weight="900">规则层</text>
+      <text x="222" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">边界先行</text>
+      <text x="222" y="598" text-anchor="middle" fill="#8899AA" font-size="15">项目指令</text>
+      <text x="222" y="624" text-anchor="middle" fill="#8899AA" font-size="15">阶段路由</text>
+    </g>
+
+    <g>
+      <circle cx="612" cy="446" r="34" fill="#132D5E" stroke="#2563EB" stroke-width="3"/>
+      <text x="612" y="455" text-anchor="middle" fill="#1D4ED8" font-size="25" font-weight="900">2</text>
+      <rect x="510" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#BFDBFE"/>
+      <text x="612" y="536" text-anchor="middle" fill="#1D4ED8" font-size="20" font-weight="900">执行层</text>
+      <text x="612" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">行动受控</text>
+      <text x="612" y="598" text-anchor="middle" fill="#8899AA" font-size="15">最小改动</text>
+      <text x="612" y="624" text-anchor="middle" fill="#8899AA" font-size="15">沙箱权限</text>
+    </g>
+
+    <g>
+      <circle cx="1002" cy="446" r="34" fill="#4A3408" stroke="#B45309" stroke-width="3"/>
+      <text x="1002" y="455" text-anchor="middle" fill="#B45309" font-size="25" font-weight="900">3</text>
+      <rect x="900" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#F59E0B"/>
+      <text x="1002" y="536" text-anchor="middle" fill="#B45309" font-size="20" font-weight="900">证据层</text>
+      <text x="1002" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">自动收集</text>
+      <text x="1002" y="598" text-anchor="middle" fill="#8899AA" font-size="15">logs / metrics</text>
+      <text x="1002" y="624" text-anchor="middle" fill="#8899AA" font-size="15">replay</text>
+    </g>
+
+    <g>
+      <circle cx="1392" cy="446" r="34" fill="#1A0D2E" stroke="#7C3AED" stroke-width="3"/>
+      <text x="1392" y="455" text-anchor="middle" fill="#6D28D9" font-size="25" font-weight="900">4</text>
+      <rect x="1290" y="500" width="204" height="150" rx="22" fill="#1E1E32" stroke="#8B5CF6"/>
+      <text x="1392" y="536" text-anchor="middle" fill="#6D28D9" font-size="20" font-weight="900">治理层</text>
+      <text x="1392" y="570" text-anchor="middle" fill="#E8E8F0" font-size="16" font-weight="800">长期可见</text>
+      <text x="1392" y="598" text-anchor="middle" fill="#8899AA" font-size="15">审查门禁</text>
+      <text x="1392" y="624" text-anchor="middle" fill="#8899AA" font-size="15">风险统计</text>
+    </g>
+
+    <rect x="266" y="708" width="1068" height="64" rx="32" fill="#E8E8F0"/>
+    <text x="800" y="733" text-anchor="middle" fill="#1E1E32" font-size="18" font-weight="900">成熟状态：证据从“人提醒”变成“系统要求”</text>
+    <text x="800" y="760" text-anchor="middle" fill="#333348" font-size="15">规则约束边界，执行控制动作，证据沉淀事实，治理观察长期效果</text>
+  </g>
+</svg>
