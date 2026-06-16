@@ -62,9 +62,9 @@
   --svg-shadow: #0F172A;
 
   /* Layout */
-  --max-width: 1200px;
+  --max-width: min(90vw, 1600px);
   --max-content: 720px;
-  --toc-width: 220px;
+  --toc-width: 240px;
 
   /* Spacing */
   --space-xs: 4px;
