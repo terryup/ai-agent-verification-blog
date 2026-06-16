@@ -438,7 +438,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* ── Article Content ───────────────────────── */
 .article-content {
-  max-width: 68ch;
+  max-width: 100%;
 }
 
 /* ── Article Typography ────────────────────── */
