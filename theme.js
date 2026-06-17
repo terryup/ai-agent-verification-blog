@@ -72,17 +72,27 @@
   });
 
   // ── Init ───────────────────────────────────
+  // This script runs in <head>, before <body> is parsed. We apply the theme
+  // immediately so data-theme is set before <body> paints (prevents a
+  // light-mode flash). The DOM-dependent parts of applyTheme — updateToggleIcon
+  // and swapExternalSvgs — no-op here because #themeToggle and the <img> tags
+  // don't exist yet. We re-apply once the DOM is ready (below) so the toggle
+  // icon and the light/dark SVG variants match the initial theme on first paint.
   var initialTheme = getInitialTheme();
   applyTheme(initialTheme);
 
-  // Bind toggle after DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      var toggle = document.getElementById('themeToggle');
-      if (toggle) toggle.addEventListener('click', handleToggle);
-    });
-  } else {
+  function onReady(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn);
+    } else {
+      fn();
+    }
+  }
+
+  onReady(function () {
+    var theme = document.documentElement.getAttribute('data-theme') || LIGHT;
+    applyTheme(theme);
     var toggle = document.getElementById('themeToggle');
     if (toggle) toggle.addEventListener('click', handleToggle);
-  }
+  });
 })();
