@@ -375,6 +375,37 @@ img { max-width: 100%; height: auto; display: block; }
   color: oklch(0.6 0.005 260);
 }
 
+.article-hero .byline-avatar,
+.hero .byline-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--accent), #9333EA);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.article-hero .byline-name,
+.hero .byline-name {
+  font-weight: 600;
+  color: oklch(0.9 0.003 260);
+}
+
+.article-hero .byline-sep,
+.hero .byline-sep {
+  color: oklch(0.6 0.005 260);
+}
+
+.article-hero .byline-date,
+.hero .byline-date {
+  color: oklch(0.75 0.005 260);
+}
+
 /* ── Article Layout (Grid + TOC) ───────────── */
 .article-layout,
 .doc-shell {

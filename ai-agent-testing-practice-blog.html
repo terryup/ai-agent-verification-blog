@@ -6,99 +6,18 @@
   <title>如何设计测试 Agent：Harness 自测体系的架构方法</title>
   <link rel="stylesheet" href="shared.css" />
   <style>
-    /* ── Hero overrides ──────────────────────── */
-    .article-hero {
-      min-height: 680px;
-      align-items: center;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
+    /* ── Hero background ──────────────────────── */
     .article-hero::before {
       background:
-        radial-gradient(ellipse 50% 80% at 20% 0%, color-mix(in srgb, var(--accent) 6%, transparent) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(147, 51, 234, 0.05) 0%, transparent 70%),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.86) 36%, rgba(255, 255, 255, 0.18) 68%),
+        linear-gradient(
+          to top,
+          oklch(0.1 0.01 260 / 0.85) 0%,
+          oklch(0.1 0.01 260 / 0.4) 50%,
+          oklch(0.1 0.01 260 / 0.1) 100%
+        ),
         url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
       background-size: cover;
       background-position: center;
-      transform: scale(1.01);
-    }
-
-    [data-theme="dark"] .article-hero::before {
-      background:
-        radial-gradient(ellipse 50% 80% at 20% 0%, color-mix(in srgb, var(--accent) 8%, transparent) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 60% at 80% 20%, rgba(147, 51, 234, 0.08) 0%, transparent 70%),
-        linear-gradient(90deg, rgba(10, 10, 10, 0.97) 0%, rgba(10, 10, 10, 0.86) 36%, rgba(10, 10, 10, 0.18) 68%),
-        url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
-      background-size: cover;
-      background-position: center;
-    }
-
-    .hero-inner {
-      max-width: var(--max-width);
-      padding: 116px 28px 104px;
-    }
-
-    .article-hero h1 {
-      max-width: 760px;
-      font-size: clamp(42px, 7vw, 82px);
-      line-height: 1.04;
-      letter-spacing: 0;
-      color: var(--text-primary);
-    }
-
-    .article-hero .subtitle {
-      max-width: 700px;
-      font-size: 25px;
-      line-height: 1.58;
-      color: var(--text-secondary);
-    }
-
-    .article-hero .hero-tags span {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-full);
-      padding: 9px 15px;
-      color: var(--text-primary);
-      font-size: 15px;
-      font-weight: 700;
-      box-shadow: var(--shadow-sm);
-    }
-
-    [data-theme="dark"] .article-hero .hero-tags span {
-      background: var(--bg-elevated);
-    }
-
-    .article-hero .byline {
-      margin-top: 28px;
-      font-size: 15px;
-    }
-
-    .byline-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #9333EA, #E53935);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: 700;
-      font-size: 14px;
-      flex-shrink: 0;
-    }
-
-    .byline-name {
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .byline-sep {
-      color: var(--text-tertiary);
-    }
-
-    .byline-date {
-      color: var(--text-secondary);
     }
 
     /* ── TOC head / links ─────────────────────── */
@@ -134,22 +53,25 @@
 
     /* ── Sections ─────────────────────────────── */
     section {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-top: 18px;
-      padding: 32px 36px;
+      margin: 0 0 74px;
+      scroll-margin-top: 28px;
     }
 
     .article-content section h2 {
-      margin: 0 0 16px;
-      font-size: 26px;
-      line-height: 1.32;
+      margin: 0 0 22px;
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    section:target h2 {
+      color: var(--accent);
     }
 
     .article-content section h3 {
-      margin: 28px 0 10px;
-      font-size: 19px;
+      margin: 38px 0 14px;
+      font-size: 25px;
+      line-height: 1.32;
     }
 
     .lead {
@@ -388,37 +310,6 @@
 
     /* ── Responsive ───────────────────────────── */
     @media (max-width: 760px) {
-      .article-hero {
-        min-height: 560px;
-      }
-
-      .article-hero::before {
-        background-image:
-          linear-gradient(180deg, rgba(250, 250, 250, 0.98) 0%, rgba(250, 250, 250, 0.9) 56%, rgba(250, 250, 250, 0.35) 100%),
-          url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
-        background-position: center right;
-      }
-
-      [data-theme="dark"] .article-hero::before {
-        background-image:
-          linear-gradient(180deg, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.9) 56%, rgba(10, 10, 10, 0.35) 100%),
-          url("./agent-testing-visuals/cover-background-testing-agent-harness-v2.png");
-        background-position: center right;
-      }
-
-      .hero-inner {
-        padding: 84px 22px 76px;
-      }
-
-      .article-hero h1 {
-        font-size: 38px;
-      }
-
-      .article-hero .subtitle {
-        font-size: 20px;
-      }
-
-      section { padding: 24px; }
       .grid-2, .grid-3, .visual-grid, .mini-flow { grid-template-columns: 1fr; }
       .mini-step::after { display: none; }
     }
