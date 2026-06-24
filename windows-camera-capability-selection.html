@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Windows 摄像头给了这么多能力，到底该选哪个？</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    /* ── Article-specific hero ─────────────────── */
+    .article-hero::before {
+      background:
+        linear-gradient(
+          to top,
+          oklch(0.1 0.01 260 / 0.86) 0%,
+          oklch(0.12 0.02 270 / 0.50) 50%,
+          oklch(0.2 0.04 270 / 0.14) 100%
+        );
+    }
+    
+    /* ── TOC ───────────────────────────────────── */
+    .toc-head {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .toc-head span {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    
+    .toc-head strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .toc-links {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    section {
+      margin: 0 0 74px;
+      scroll-margin-top: 28px;
+    }
+    
+    section:target h2 {
+      color: var(--accent);
+    }
+    
+    .lead {
+      font-size: 18px;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+    
+    /* ── Figure ────────────────────────────────── */
+    .figure {
+      margin: 34px 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    
+    .figure-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+    
+    .figure-title strong { font-size: 18px; }
+    .figure-title span { color: var(--text-secondary); font-size: 14px; font-weight: 700; }
+    .figure-body { padding: 24px; }
+    
+    /* ── Cards ─────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    
+    .card {
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .card h4 { margin: 0 0 10px; font-size: 18px; line-height: 1.35; }
+    .card p { margin: 0; color: var(--text-secondary); font-size: 15px; }
+    .bad { border-color: var(--error); background: color-mix(in srgb, var(--error) 8%, var(--bg-card)); }
+    .good { border-color: var(--success); background: color-mix(in srgb, var(--success) 8%, var(--bg-card)); }
+    .bad h4 { color: var(--error); }
+    .good h4 { color: var(--success); }
+    
+    /* ── Plan field grid ───────────────────────── */
+    .neg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .neg { border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); padding: 16px 18px; }
+    .neg b { display: block; color: var(--text-secondary); font-size: 14px; margin-bottom: 4px; }
+    .neg.neg-in b { color: var(--success); }
+    .neg.neg-out b { color: var(--text-tertiary); }
+    .neg span { display: block; color: var(--text-primary); font-size: 16px; font-weight: 600; }
+    .neg small { display: block; color: var(--text-secondary); font-size: 13px; margin-top: 4px; line-height: 1.5; }
+    
+    /* ── Capability list ───────────────────────── */
+    .cap-list { display: grid; gap: 8px; }
+    .cap-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 120px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      font-size: 15px;
+    }
+    .cap-row .cap-fmt { font-family: var(--font-mono); font-weight: 700; color: var(--accent); }
+    .cap-row .cap-desc { color: var(--text-secondary); font-size: 14px; }
+    .cap-row .cap-mark { text-align: right; font-size: 13px; font-weight: 700; }
+    .cap-row.picked { border-color: var(--error); background: color-mix(in srgb, var(--error) 8%, var(--bg-card)); }
+    .cap-row.picked .cap-mark { color: var(--error); }
+    .cap-row .cap-mark.ok { color: var(--success); }
+    
+    /* ── Flow / Summary ────────────────────────── */
+    .problem-flow {
+      display: grid;
+      grid-template-columns: 1fr 40px 1fr 40px 1fr;
+      align-items: stretch;
+      margin: 28px 0;
+    }
+    .pf-box { border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); padding: 18px; display: flex; flex-direction: column; gap: 6px; box-shadow: var(--shadow-sm); }
+    .pf-box.pf-decision { border-color: var(--accent); background: var(--accent-soft); }
+    .pf-box b { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 4px; }
+    .pf-box.pf-decision b { color: var(--accent); }
+    .pf-box span { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
+    .pf-box small { color: var(--text-secondary); font-size: 13px; }
+    .pf-arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 22px; font-weight: 700; }
+    
+    .mini-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 28px 0; }
+    .mini-summary div { border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); }
+    .mini-summary b { display: block; color: var(--accent); font-size: 17px; margin-bottom: 6px; }
+    .mini-summary span { color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+    
+    /* ── Cost-chain SVG ────────────────────────── */
+    .chain-svg { width: 100%; height: auto; display: block; overflow-x: auto; }
+    .chain-svg svg { width: 100%; min-width: 780px; height: auto; display: block; }
+    .chain-svg .src { fill: var(--svg-card); stroke: var(--svg-border); stroke-width: 1.5; }
+    .chain-svg .src-name { fill: var(--svg-text); font-weight: 700; font-size: 13px; }
+    .chain-svg .src-sub { fill: var(--svg-text-secondary); font-size: 10px; }
+    .chain-svg .proc { fill: var(--svg-card); stroke-width: 2; }
+    .chain-svg .proc-text { font-weight: 600; font-size: 12px; }
+    .chain-svg .proc-cost { font-size: 10px; }
+    .chain-svg .arrow { stroke: var(--svg-connector); stroke-width: 1.5; fill: none; }
+    .chain-svg .arrow-head { fill: var(--svg-connector); }
+    .chain-svg .enc { fill: var(--svg-card); stroke: var(--svg-blue); stroke-width: 2; }
+    .chain-svg .enc-text { fill: var(--svg-blue); font-weight: 700; font-size: 12px; }
+    .chain-svg .ord { font-family: var(--font-mono); font-weight: 800; font-size: 14px; }
+    .chain-svg .ord-sub { font-size: 10px; fill: var(--svg-text-secondary); }
+    .chain-svg .teal-s { stroke: var(--svg-teal); } .chain-svg .teal-f { fill: var(--svg-teal); }
+    .chain-svg .blue-s { stroke: var(--svg-blue); } .chain-svg .blue-f { fill: var(--svg-blue); }
+    .chain-svg .amber-s { stroke: var(--svg-amber); } .chain-svg .amber-f { fill: var(--svg-amber); }
+    .chain-svg .red-s { stroke: var(--svg-red); } .chain-svg .red-f { fill: var(--svg-red); }
+    .chain-svg .qual-s { stroke: var(--svg-amber); stroke-dasharray: 5 4; } .chain-svg .qual-f { fill: var(--svg-amber); }
+    .chain-svg .note-text { fill: var(--svg-amber); font-size: 10px; font-weight: 700; }
+    
+    @media (max-width: 760px) {
+      .two-col, .neg-grid, .mini-summary { grid-template-columns: 1fr; }
+      .problem-flow { grid-template-columns: 1fr; gap: 8px; }
+      .pf-arrow { transform: rotate(90deg); height: 28px; }
+      .cap-row { grid-template-columns: 90px 1fr; }
+      .cap-row .cap-mark { grid-column: 1 / -1; text-align: left; }
+    }
+  </style>
+  <script src="theme.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="./index.html" class="site-logo">zixuan</a>
+      <nav class="site-nav">
+        <a href="./index.html">Home</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <header class="article-hero">
+      <div class="hero-inner">
+        <h1>Windows 摄像头给了这么多能力，到底该选哪个？</h1>
+        <div class="hero-tags">
+          <span>采集策略</span>
+          <span>能力选择</span>
+          <span>格式处理成本</span>
+          <span>资源复用</span>
+        </div>
+        <div class="byline">
+          <div class="byline-avatar">Z</div>
+          <span class="byline-name">zixuan</span>
+          <span class="byline-sep">·</span>
+          <span class="byline-date">2026 年 6 月</span>
+        </div>
+      </div>
+    </header>
+  
+    <div class="article-layout">
+      <aside class="article-toc" aria-label="文章目录">
+        <nav class="toc">
+          <div class="toc-head">
+            <span>目录</span>
+            <strong>从摄像头枚举，到可复用的 CapturePlan</strong>
+          </div>
+          <div class="toc-links">
+            <a href="#problem">1. capability 不是策略</a>
+            <a href="#plan">2. 决策产物不是一个格式</a>
+            <a href="#order">3. 这是字典序策略，不是成本函数</a>
+            <a href="#score">4. 评分表只解决格式这一维</a>
+            <a href="#normalize">5. 归一化决定能不能复用源</a>
+            <a href="#boundary">6. 直通、兜底与边界</a>
+            <a href="#conclusion">结尾. 这套策略真正保护什么</a>
+          </div>
+        </nav>
+      </aside>
+  
+      <main class="article-content">
+        <section>
+          <p class="lead">Windows 摄像头枚举出来的 capability 只是硬件说"我能吐这些"，不是系统说"我应该拿这个"。采集策略的价值，在于把一份偶然排序的能力清单，收敛成后续 pipeline 可以稳定消费、可以复用、也可以解释的 CapturePlan。</p>
+          <div class="note">
+            <strong>评分表不是"总代价最小算法"，而是一个局部排序器。</strong>真正的工程问题是：在多个 capability 都"能用"时，系统如何选择一个源、如何归一化它、如何让资源池判断它能不能被复用。
+          </div>
+        </section>
+  
+        <section id="problem">
+          <h2>1. capability 不是策略</h2>
+          <p>一个 Windows 摄像头通常会返回几十条能力：格式、宽高、帧率交叉组合在一起。直接拿第一条，等于把系统决策权交给了摄像头枚举顺序；按分辨率最近拿，也只是把问题缩成了一个维度。</p>
+  
+          <div class="figure">
+            <div class="figure-title">
+              <strong>同一个 1080p30 目标下，多个 capability 都看起来能用</strong>
+              <span>区别不在能不能采，而在后续要付什么代价</span>
+            </div>
+            <div class="figure-body">
+              <div class="cap-list">
+                <div class="cap-row picked">
+                  <span class="cap-fmt">H264</span>
+                  <span class="cap-desc">1920×1080 @ 30fps，压缩流；如果不是目标直通，就要走解码/再编码语义</span>
+                  <span class="cap-mark">只在直通前提下便宜</span>
+                </div>
+                <div class="cap-row">
+                  <span class="cap-fmt">I420</span>
+                  <span class="cap-desc">1920×1080 @ 30fps，planar YUV，通常最贴近编码器输入</span>
+                  <span class="cap-mark ok">非直通时优先</span>
+                </div>
+                <div class="cap-row">
+                  <span class="cap-fmt">YUY2</span>
+                  <span class="cap-desc">1920×1080 @ 30fps，packed YUV，需要内存重排或转换</span>
+                  <span class="cap-mark">可接受</span>
+                </div>
+                <div class="cap-row">
+                  <span class="cap-fmt">RGB24</span>
+                  <span class="cap-desc">1920×1080 @ 30fps，需要 RGB → YUV 色彩空间转换</span>
+                  <span class="cap-mark">较贵</span>
+                </div>
+                <div class="cap-row">
+                  <span class="cap-fmt">MJPEG</span>
+                  <span class="cap-desc">1920×1080 @ 30fps，逐帧 JPEG，需要解码，但没有帧间依赖</span>
+                  <span class="cap-mark">兜底</span>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <p>这里的核心不是"I420 一定赢过 H264"，而是同一行格式在不同阶段含义不同：H264 如果能作为目标编码流直通，它可能最便宜；如果后面还要进入普通编码 pipeline，它反而是最贵的一类输入。采集策略必须先区分这些前提，再谈排序。</p>
+          <div class="note warn"><strong>格式成本只有在前提明确时才有意义。</strong>脱离直通、编码、归一化这些阶段，只说"哪个格式更便宜"，会把一个多阶段策略误解成单表排序。</div>
+        </section>
+  
+        <section id="plan">
+          <h2>2. 决策产物不是一个格式</h2>
+          <p>采集策略输出的不是"选中了 I420"这么简单，而是一个 CapturePlan。真正影响后续行为的是这些字段：</p>
+  
+          <div class="figure">
+            <div class="figure-title">
+              <strong>CapturePlan 的关键字段</strong>
+              <span>格式选择只是其中一部分</span>
+            </div>
+            <div class="figure-body">
+              <div class="neg-grid">
+                <div class="neg neg-in">
+                  <b>sourceCapability</b>
+                  <span>记录策略认为最合适的原始候选</span>
+                  <small>后续编码参数默认值会参考它</small>
+                </div>
+                <div class="neg neg-in">
+                  <b>normalizedCapability</b>
+                  <span>真正交给 CreateMediaSource 的采集能力</span>
+                  <small>也进入 ResourcePool 的 source key</small>
+                </div>
+                <div class="neg neg-out">
+                  <b>processing flags</b>
+                  <span>标记是否 passthrough、是否需要 scale</span>
+                  <small>它们是后续 pipeline 的路由信息</small>
+                </div>
+                <div class="neg neg-out">
+                  <b>target encoder</b>
+                  <span>客户端指定目标编码器和编码参数</span>
+                  <small>策略补默认值，但不替客户端选择 codec</small>
+                </div>
+                <div class="neg neg-out">
+                  <b>source key</b>
+                  <span>由 deviceId、type、normalizedCapability 组成</span>
+                  <small>决定多个 session 能否共用同一个采集源</small>
+                </div>
+                <div class="neg neg-out">
+                  <b>pipeline key</b>
+                  <span>在 source key 基础上加 encoder 和 passthrough</span>
+                  <small>区分同源上的不同处理链路</small>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <p>这个结构说明了一件事：策略层不是在做"格式排行榜"，而是在把摄像头能力翻译成资源模型。真正危险的错误也不只是选错格式，而是让两个本该复用的采集源因为能力不一致无法复用，或者让两个处理语义不同的 pipeline 被错误合并。</p>
+        </section>
+  
+        <section id="order">
+          <h2>3. 这是字典序策略，不是成本函数</h2>
+          <p>当前实现的核心比较不是一个加权分数，而是字典序 tuple：</p>
+  
+          <pre><code>// passthrough 阶段
+  (abs(targetW - cap.width),
+   abs(targetH - cap.height),
+   abs(targetFps - cap.framerate))
+  
+  // 非直通阶段
+  (abs(targetW - cap.width),
+   abs(targetH - cap.height),
+   typeOrder,
+   abs(targetFps - cap.framerate),
+   detailOrder)</code></pre>
+  
+          <p>这意味着它不是在证明"总代价最小"，而是在表达一组强优先级判断：先保分辨率，再看格式族，再看帧率，最后才看同族细节。这个差别很重要，因为字典序策略没有单位换算，也没有说"一次缩放等于多少次色彩转换"。</p>
+  
+          <div class="two-col">
+            <div class="card good">
+              <h4>字典序的好处</h4>
+              <p>它简单、稳定、可解释。每一层比较都能对应一个工程偏好：分辨率不轻易牺牲；格式成本只在分辨率接近时介入；同族差异不跨越族边界。</p>
+            </div>
+            <div class="card bad">
+              <h4>字典序的代价</h4>
+              <p>它会把字段顺序固化成强规则。比如宽高差优先于格式成本，就意味着一个分辨率更贴近但格式更贵的 capability 可能胜出。</p>
+            </div>
+          </div>
+  
+          <div class="note">
+            <strong>算法的本质不是一张表，而是一组优先级承诺。</strong>数字 0、10、100 本身不重要；真正影响行为的是字段顺序，以及字段顺序背后的取舍。
+          </div>
+        </section>
+  
+        <section id="score">
+          <h2>4. 评分表只解决格式这一维</h2>
+          <p>评分表只在非直通阶段、且宽高比较没有先把候选分出胜负时，介入格式处理成本排序。它不是入口决策，也不会覆盖分辨率和帧率字段的优先级。</p>
+          <div class="two-col">
+            <div class="card good">
+              <h4>typeOrder</h4>
+              <p>表达格式族之间的结构性差异：planar YUV、packed YUV、RGB、帧内压缩、灰度、帧间压缩。族间差异先于同族细节。</p>
+            </div>
+            <div class="card good">
+              <h4>detailOrder</h4>
+              <p>表达同族内部偏好：I420、NV12、NV21 都属于 planar YUV，但仍可用更小的次序决定默认选择。</p>
+            </div>
+          </div>
+          <p>建表依据不是"格式名好不好看"，而是这个 capability 进入普通编码 pipeline 前要经历什么处理：</p>
+  
+          <div class="figure">
+            <div class="figure-title">
+              <strong>格式族排序的依据</strong>
+              <span>注意：这不是全局成本函数，只是格式维度排序</span>
+            </div>
+            <div class="figure-body">
+              <div class="chain-svg">
+                <svg viewBox="0 0 780 415" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="建表依据：处理代价链">
+                  <defs>
+                    <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                      <polygon points="0,0 6,3 0,6" class="arrow-head"/>
+                    </marker>
+                  </defs>
+  
+                  <!-- encoder column (shared sink) -->
+                  <rect x="404" y="16" width="52" height="374" rx="12" class="enc"/>
+                  <text x="430" y="406" text-anchor="middle" class="enc-text">编码器</text>
+  
+                  <!-- row 0: Planar YUV -->
+                  <rect x="4" y="33" width="128" height="44" rx="8" class="src"/>
+                  <text x="68" y="51" text-anchor="middle" class="src-name">Planar YUV</text>
+                  <text x="68" y="66" text-anchor="middle" class="src-sub">I420·NV12·NV21</text>
+                  <line x1="132" y1="55" x2="154" y2="55" class="arrow" marker-end="url(#ah)"/>
+                  <rect x="160" y="33" width="216" height="44" rx="8" class="proc teal-s"/>
+                  <text x="268" y="52" text-anchor="middle" class="proc-text teal-f">无处理，编码器原生接受</text>
+                  <text x="268" y="67" text-anchor="middle" class="proc-cost teal-f">代价：零</text>
+                  <line x1="376" y1="55" x2="398" y2="55" class="arrow" marker-end="url(#ah)"/>
+                  <text x="476" y="52" class="ord teal-f">typeOrder 0</text>
+                  <text x="476" y="67" class="ord-sub">detail 0 / 1 / 2</text>
+  
+                  <!-- row 1: Packed YUV -->
+                  <rect x="4" y="93" width="128" height="44" rx="8" class="src"/>
+                  <text x="68" y="111" text-anchor="middle" class="src-name">Packed YUV</text>
+                  <text x="68" y="126" text-anchor="middle" class="src-sub">YUY2</text>
+                  <line x1="132" y1="115" x2="154" y2="115" class="arrow" marker-end="url(#ah)"/>
+                  <rect x="160" y="93" width="216" height="44" rx="8" class="proc blue-s"/>
+                  <text x="268" y="112" text-anchor="middle" class="proc-text blue-f">解包成 planar（内存重排）</text>
+                  <text x="268" y="127" text-anchor="middle" class="proc-cost blue-f">代价：小</text>
+                  <line x1="376" y1="115" x2="398" y2="115" class="arrow" marker-end="url(#ah)"/>
+                  <text x="476" y="112" class="ord blue-f">typeOrder 1</text>
+                  <text x="476" y="127" class="ord-sub">detail 10</text>
+  
+                  <!-- row 2: RGB -->
+                  <rect x="4" y="153" width="128" height="44" rx="8" class="src"/>
+                  <text x="68" y="171" text-anchor="middle" class="src-name">RGB 族</text>
+                  <text x="68" y="186" text-anchor="middle" class="src-sub">RGB24·BGRA</text>
+                  <line x1="132" y1="175" x2="154" y2="175" class="arrow" marker-end="url(#ah)"/>
+                  <rect x="160" y="153" width="216" height="44" rx="8" class="proc blue-s"/>
+                  <text x="268" y="172" text-anchor="middle" class="proc-text blue-f">色彩空间转换 RGB→YUV</text>
+                  <text x="268" y="187" text-anchor="middle" class="proc-cost blue-f">代价：中</text>
+                  <line x1="376" y1="175" x2="398" y2="175" class="arrow" marker-end="url(#ah)"/>
+                  <text x="476" y="172" class="ord blue-f">typeOrder 2</text>
+                  <text x="476" y="187" class="ord-sub">detail 100 / 110</text>
+  
+                  <!-- row 3: MJPEG -->
+                  <rect x="4" y="213" width="128" height="44" rx="8" class="src"/>
+                  <text x="68" y="231" text-anchor="middle" class="src-name">帧内压缩</text>
+                  <text x="68" y="246" text-anchor="middle" class="src-sub">MJPEG</text>
+                  <line x1="132" y1="235" x2="154" y2="235" class="arrow" marker-end="url(#ah)"/>
+                  <rect x="160" y="213" width="216" height="44" rx="8" class="proc amber-s"/>
+                  <text x="268" y="232" text-anchor="middle" class="proc-text amber-f">JPEG 逐帧解码</text>
+                  <text x="268" y="247" text-anchor="middle" class="proc-cost amber-f">代价：高</text>
+                  <line x1="376" y1="235" x2="398" y2="235" class="arrow" marker-end="url(#ah)"/>
+                  <text x="476" y="232" class="ord amber-f">typeOrder 3</text>
+                  <text x="476" y="247" class="ord-sub">detail 200</text>
+  
+                  <!-- row 4: grayscale (quality axis exception) -->
+                  <rect x="4" y="273" width="128" height="44" rx="8" class="src"/>
+                  <text x="68" y="291" text-anchor="middle" class="src-name">灰度</text>
+                  <text x="68" y="306" text-anchor="middle" class="src-sub">L8·L16</text>
+                  <line x1="132" y1="295" x2="154" y2="295" class="arrow" marker-end="url(#ah)"/>
+                  <rect x="160" y="273" width="216" height="44" rx="8" class="proc qual-s"/>
+                  <text x="268" y="292" text-anchor="middle" class="proc-text qual-f">丢色度 ⚠（信息永久丢失）</text>
+                  <text x="268" y="307" text-anchor="middle" class="proc-cost qual-f">代价：质量损失</text>
+                  <line x1="376" y1="295" x2="398" y2="295" class="arrow" marker-end="url(#ah)"/>
+                  <text x="476" y="292" class="ord qual-f">typeOrder 4</text>
+                  <text x="476" y="307" class="ord-sub">detail 250 / 260</text>
+                  <text x="476" y="322" class="note-text">← 质量轴破例</text>
+  
+                  <!-- row 5: inter-frame compressed -->
+                  <rect x="4" y="333" width="128" height="44" rx="8" class="src"/>
+                  <text x="68" y="351" text-anchor="middle" class="src-name">帧间压缩</text>
+                  <text x="68" y="366" text-anchor="middle" class="src-sub">H264·H265</text>
+                  <line x1="132" y1="355" x2="154" y2="355" class="arrow" marker-end="url(#ah)"/>
+                  <rect x="160" y="333" width="216" height="44" rx="8" class="proc red-s"/>
+                  <text x="268" y="352" text-anchor="middle" class="proc-text red-f">完整视频解码</text>
+                  <text x="268" y="367" text-anchor="middle" class="proc-cost red-f">代价：最高</text>
+                  <line x1="376" y1="355" x2="398" y2="355" class="arrow" marker-end="url(#ah)"/>
+                  <text x="476" y="352" class="ord red-f">typeOrder 5</text>
+                  <text x="476" y="367" class="ord-sub">detail 300 / 310</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+  
+          <p>这张表有两个边界。第一，H264/H265 在非直通阶段排在最后，不代表它们永远差；它们在目标编码格式一致时可能先进入 passthrough 候选。第二，灰度并不是处理成本最高，而是信息保真最差：丢色度是不可逆质量损失，所以它的位置不是纯性能排序。</p>
+  
+          <div class="note warn">
+            <strong>灰度这一行不是纯处理成本排序。</strong>这里混入了第二条轴：质量损失。它的位置表达的是一个业务判断：保留色彩信息，比少做一次 MJPEG 解码更重要。
+          </div>
+        </section>
+  
+        <section id="normalize">
+          <h2>5. 归一化决定能不能复用源</h2>
+          <p>评分表选出 sourceCapability 后，策略还会做一件容易被忽略、但对系统更重要的事：找一个基础分辨率，生成 normalizedCapability。</p>
+  
+          <div class="problem-flow">
+            <div class="pf-box">
+              <b>sourceCapability</b>
+              <span>策略选择的候选</span>
+              <small>例如 1920×1080 I420</small>
+            </div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-box pf-decision">
+              <b>base resolution</b>
+              <span>从非压缩能力里选基准分辨率</span>
+              <span>优先不低于目标，否则取最大</span>
+            </div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-box">
+              <b>normalizedCapability</b>
+              <span>创建 source 时实际使用</span>
+              <small>进入 ResourcePool source key</small>
+            </div>
+          </div>
+  
+          <p>这一步的工程含义是：采集源最好按少数稳定规格创建，然后在 pipeline 层做 scale。这样两个业务请求即使目标编码参数不同，也可能复用同一个底层 source。评分表解决的是"选哪条 capability"，归一化解决的是"这个选择能不能沉淀成可复用资源"。</p>
+  
+          <div class="note ok">
+            <strong>格式评分解决"拿哪种输入更便宜"，归一化解决"系统里能不能少开一个采集源"。</strong>前者是局部性能，后者是资源生命周期。
+          </div>
+        </section>
+  
+        <section id="boundary">
+          <h2>6. 直通、兜底与边界</h2>
+          <p>这套策略有三个容易误读的边界。它们决定了评分表什么时候生效，也决定了策略输出不能被过度解读。</p>
+  
+          <h3>边界一：passthrough 是语义，不是自动成立的零成本</h3>
+          <p>策略层会在目标 codec 可以映射到摄像头压缩格式时，优先找同格式 capability，并把 <code>isPassthrough</code> 置真。这个标记表达的是"这条路径具备直通语义"。但后续 pipeline 是否真的跳过 Encode，必须由执行层实现。否则它只是路由标记，不是零编码承诺。</p>
+  
+          <h3>边界二：FindBestRawCapability 并不只选 Raw</h3>
+          <p>非直通阶段的评分表里仍然包含 MJPEG、H264、H265。它们不是优先项，而是兜底项。这个选择很现实：如果摄像头没有理想的 raw/yuv/rgb 能力，系统宁可选一个昂贵但可用的压缩输入，也不要直接失败。</p>
+  
+          <h3>边界三：默认目标不是完全照抄客户端参数</h3>
+          <p>实现里目标宽高和帧率有默认下限：小于 1080p30 的请求不会把策略目标降到更小规格。这个选择可能是为了源复用和画质余量，但它也意味着"用户请求 720p"不等于"采集源也选 720p"。</p>
+  
+          <div class="mini-summary">
+            <div>
+              <b>策略承诺</b>
+              <span>采集策略是一组可解释的优先级和资源复用约束，而不是追求数学意义上的全局最优。</span>
+            </div>
+            <div>
+              <b>策略边界</b>
+              <span>评分表不保证总代价最小；passthrough 也只有在执行层确实绕过编码时，才等价于零编码路径。</span>
+            </div>
+          </div>
+        </section>
+  
+        <section id="conclusion">
+          <h2>结尾：这套策略真正保护什么</h2>
+          <p>采集策略真正保护的不是某个格式永远排第一，而是三件事：不依赖摄像头枚举顺序；在多个可用 capability 之间做稳定、可解释的取舍；让采集源具备被 ResourcePool 复用的可能。</p>
+          <div class="note ok">
+            <strong>评分表的价值，是把格式处理成本放进策略；它的边界，是它不能替代完整的采集计划。</strong>采集策略真正落地时，评分、归一化、资源 key 和 pipeline 行为必须一起看。
+          </div>
+        </section>
+      </main>
+    </div>
+  
+    <footer class="site-footer">
+      &copy; 2026 zixuan
+    </footer>
+</body>
+</html>
