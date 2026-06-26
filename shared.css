@@ -607,6 +607,67 @@ img { max-width: 100%; height: auto; display: block; }
   padding: 0;
 }
 
+/* ── Code Block Copy Button ────────────────── */
+.pre-wrap {
+  position: relative;
+  margin: 24px 0;
+}
+
+.article-content .pre-wrap pre {
+  margin: 0;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.copy-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.copy-btn .check-icon { display: none; }
+.copy-btn.copied .copy-icon { display: none; }
+.copy-btn.copied .check-icon { display: inline-block; }
+
+.pre-wrap:hover .copy-btn,
+.copy-btn:focus-visible {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.copy-btn.copied {
+  color: var(--success);
+  border-color: var(--success);
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .copy-btn { opacity: 1; }
+}
+
 /* ── Tags ──────────────────────────────────── */
 .tag {
   display: inline-block;

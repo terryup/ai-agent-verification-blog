@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Windows 上端口起不来怎么办？</title>
+  <link rel="stylesheet" href="shared.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    .article-hero::before {
+      background:
+        linear-gradient(
+          to top,
+          oklch(0.1 0.01 260 / 0.88) 0%,
+          oklch(0.12 0.02 250 / 0.54) 52%,
+          oklch(0.22 0.05 220 / 0.16) 100%
+        );
+    }
+
+    .article-hero h1 {
+      font-family: "Noto Serif SC", var(--font-sans);
+      font-weight: 900;
+    }
+
+    .hero-art {
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: clamp(260px, 36vw, 440px);
+      z-index: 1;
+      opacity: 0.95;
+      pointer-events: none;
+    }
+
+    .toc-head {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .toc-head span {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .toc-head strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .toc-links {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    section {
+      margin: 0 0 74px;
+      scroll-margin-top: 28px;
+    }
+
+    section:target h2 {
+      color: var(--accent);
+    }
+
+    .lead {
+      font-size: 18px;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+
+    .note {
+      border: 1px solid oklch(0.55 0.25 260 / 0.28);
+      background: var(--accent-soft);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin: 24px 0;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .note strong {
+      color: var(--text-primary);
+    }
+
+    .note.warn {
+      border-color: oklch(0.75 0.15 80 / 0.34);
+      background: var(--warning-soft);
+    }
+
+    .cause-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+
+    .cause-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .cause-card h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      line-height: 1.35;
+    }
+
+    .cause-card p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .cause-card.warn {
+      border-color: var(--warning);
+      background: color-mix(in srgb, var(--warning) 9%, var(--bg-card));
+    }
+
+    @media (max-width: 820px) {
+      .cause-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-art {
+        display: none;
+      }
+    }
+  </style>
+  <script src="theme.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="./index.html" class="site-logo">zixuan</a>
+      <nav class="site-nav">
+        <a href="./index.html">Home</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <header class="article-hero">
+    <svg class="hero-art" viewBox="0 0 480 320" fill="none" aria-hidden="true">
+      <defs>
+        <pattern id="portgrid" width="52" height="52" patternUnits="userSpaceOnUse">
+          <rect x="7" y="7" width="38" height="38" rx="9" stroke="#ffffff" stroke-opacity="0.13" stroke-width="1.5"/>
+        </pattern>
+      </defs>
+      <rect width="480" height="320" fill="url(#portgrid)"/>
+      <g fill="#9db8ff" fill-opacity="0.30">
+        <rect x="267" y="59" width="38" height="38" rx="9"/>
+        <rect x="319" y="59" width="38" height="38" rx="9"/>
+        <rect x="267" y="111" width="38" height="38" rx="9"/>
+        <rect x="319" y="111" width="38" height="38" rx="9"/>
+        <rect x="267" y="163" width="38" height="38" rx="9"/>
+        <rect x="319" y="163" width="38" height="38" rx="9"/>
+      </g>
+      <rect x="371" y="111" width="38" height="38" rx="9" fill="#9db8ff" fill-opacity="0.16" stroke="#ffffff" stroke-opacity="0.9" stroke-width="2"/>
+      <circle cx="390" cy="130" r="4" fill="#ffffff"/>
+    </svg>
+    <div class="hero-inner">
+      <h1>Windows 上端口起不来怎么办？</h1>
+      <p class="subtitle">一个两三百次才撞一次、撞上就只能整机重启的端口问题，背后通常是三类原因。下面是通用的排查思路，以及在安装阶段把端口提前占下来、从根上避开的做法。</p>
+      <div class="hero-tags">
+        <span>Windows</span>
+        <span>端口占用</span>
+        <span>excludedportrange</span>
+        <span>排查</span>
+      </div>
+      <div class="byline">
+        <div class="byline-avatar">Z</div>
+        <span class="byline-name">zixuan</span>
+        <span class="byline-sep">·</span>
+        <span class="byline-date">2026 年 6 月 25 日</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="article-layout">
+    <aside class="article-toc" aria-label="文章目录">
+      <nav class="toc">
+        <div class="toc-head">
+          <span>目录</span>
+          <strong>排查思路 + 提前预防</strong>
+        </div>
+        <div class="toc-links">
+          <a href="#origin">1. 起因</a>
+          <a href="#causes">2. 端口起不来有几种可能</a>
+          <a href="#occupied">3. 被进程占用了</a>
+          <a href="#reserved">4. netstat 看不到的占用：保留区间</a>
+          <a href="#timewait">5. TIME_WAIT 残留</a>
+          <a href="#reserve-port">6. 把端口提前占下来</a>
+          <a href="#checklist">7. 排查顺序</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="article-content">
+      <section id="origin">
+        <h2>1. 起因</h2>
+        <p class="lead">之前有个服务部署到 Windows 上，偶尔起不来——大概两三百次里会撞上一次，日志里报端口占用。麻烦的是一旦撞上，重启服务没用，只能整机重启才能恢复。</p>
+        <p>一开始以为是代码崩了，查了半天才发现是端口的事，而启动时又没接住这个异常，进程直接挂掉，被系统判定崩溃、自动重启，再起、再挂，表现就是“一直报错”。修完之后顺手把这类问题的排查方式整理出来。下面讲的都是 Windows 上端口起不来的通用排查逻辑。</p>
+      </section>
+
+      <section id="causes">
+        <h2>2. 端口起不来有几种可能</h2>
+        <p>第一反应往往是“谁占了我的端口”。这没错，但只对了一半。Windows 上端口绑定失败，背后其实有三类完全不同的原因，查错方向也不一样：</p>
+
+        <div class="cause-grid">
+          <div class="cause-card">
+            <h3>真被进程占着</h3>
+            <p>最常见，也最好查。netstat 能直接看到占用者。</p>
+          </div>
+          <div class="cause-card warn">
+            <h3>落进系统保留区间</h3>
+            <p>netstat 根本看不到占用者，但就是绑不上。这是“撞一次只能重启”的元凶。</p>
+          </div>
+          <div class="cause-card">
+            <h3>TIME_WAIT 残留</h3>
+            <p>上次连接没释放干净，频繁重启时出现。</p>
+          </div>
+        </div>
+
+        <p>把这三类分清楚，排查就不会瞎试。下面一类一类讲，每类都给可以直接复制来跑的命令。</p>
+      </section>
+
+      <section id="occupied">
+        <h2>3. 被进程占用了，怎么揪出来</h2>
+        <p>最直白的情况。先拿端口号去查谁在占，假设端口是 <code>52781</code>：</p>
+
+        <pre><code>netstat -ano | findstr :52781</code></pre>
+
+        <p>输出最后一列就是占用这个端口的 PID。拿到 PID 之后反查是哪个程序：</p>
+
+        <pre><code>tasklist /FI "PID eq 12345"</code></pre>
+
+        <p>确认是残留进程或冲突服务，直接干掉：</p>
+
+        <pre><code>taskkill /PID 12345 /F</code></pre>
+
+        <p>PowerShell 可以一条龙完成查询和识别：</p>
+
+        <pre><code>Get-NetTCPConnection -LocalPort 52781 | Select LocalAddress,LocalPort,State,OwningProcess
+Get-Process -Id (Get-NetTCPConnection -LocalPort 52781).OwningProcess</code></pre>
+
+        <p>不想敲命令的话，资源监视器（<code>resmon</code> → 网络 → 侦听端口）和 Sysinternals 的 TCPView 都能可视化看谁在监听哪个端口。</p>
+
+        <div class="note">
+          <strong>最常见的占用者其实是自己上次的残留进程。</strong>上次崩溃没退干净，新实例又起不来，卡在死循环。这种情况优先怀疑自己。
+        </div>
+      </section>
+
+      <section id="reserved">
+        <h2>4. netstat 看不到的占用：系统保留区间</h2>
+        <p>这是 Windows 专属的坑，也是这篇文章最想讲的部分。</p>
+        <p>有时候会遇到一种诡异情况：<code>netstat</code> 里这个端口干干净净，没有任何进程在监听，但程序一绑就失败，报地址占用。折腾半天找不到凶手。</p>
+        <p>凶手往往不是某个进程，而是<strong>系统自己把这段端口“预留”走了</strong>。Hyper-V、WSL2、Docker Desktop、WinNAT 这些组件在启动时，会向系统动态保留大段端口区间，留给它们自己用。只要你的端口落在这段区间里，哪怕没有任何进程在监听，绑定也会失败。</p>
+        <p>怎么确认？查系统当前排除（保留）了哪些端口区间：</p>
+
+        <pre><code>netsh int ipv4 show excludedportrange protocol=tcp
+netsh int ipv6 show excludedportrange protocol=tcp</code></pre>
+
+        <p>输出是一段一段的范围，比如：</p>
+
+        <pre><code>起始端口    结束端口
+----------  ----------
+50000       50059
+...</code></pre>
+
+        <p>如果你的端口正好落在某个区间内，原因就找到了。</p>
+
+        <div class="note">
+          <strong>经验信号：</strong>新机器、或者新装了 Docker / WSL 之后，某个一直好好的端口突然用不了了，基本就是这个。
+        </div>
+
+        <p>为什么前面说“只能整机重启才能恢复”？因为这种动态保留是系统在启动时分配的，一旦分到你的端口上，它会一直占着，重启服务、杀进程都没用——这些保留区间不属于任何进程，<code>taskkill</code> 根本无处下手。只有重启机器，系统重新分配动态区间，才有可能这次不撞上。这也是它发生率低（两三百次一次，纯看运气）但一旦中招就很顽固的原因。</p>
+      </section>
+
+      <section id="timewait">
+        <h2>5. TIME_WAIT 残留</h2>
+        <p>服务频繁重启时还会遇到一种：端口刚被释放，还没完全回收，卡在 <code>TIME_WAIT</code> 状态（Windows 上大概几分钟）。新实例这时候去绑就会失败。</p>
+        <p>同样先 <code>netstat</code> 看状态：</p>
+
+        <pre><code>netstat -ano | findstr :52781</code></pre>
+
+        <p>如果看到端口处于 <code>TIME_WAIT</code>，那就是它了。处理很简单——要么等几分钟，要么在监听端口上打开地址复用选项，让端口能被立刻重新绑上。</p>
+
+        <div class="note warn">
+          <strong>注意 Windows 上地址复用的语义。</strong>它比较“宽松”，允许同一端口被多个 socket 绑定，用的时候要心里有数，别把真正的重复绑定给掩盖了。
+        </div>
+      </section>
+
+      <section id="reserve-port">
+        <h2>6. 把端口提前占下来</h2>
+        <p>前面三类都是“出了问题再查”。但如果是自己部署的服务、端口是固定的，其实可以在安装阶段就把它保护好，从根上避开占用——尤其是第四节那种随机中奖、只能重启的情况，预防比排查划算得多。</p>
+        <p>思路是利用 Windows 的端口排除机制——就是第四节提到的那个“坑”，反过来用。在安装阶段、服务启动之前，主动把这个端口（或一段端口）加进系统的排除区间：</p>
+
+        <pre><code>netsh int ipv4 add excludedportrange protocol=tcp startport=52781 numberofports=1</code></pre>
+
+        <p>这样一来，系统在动态分配端口时就不会再碰它，Hyper-V 之类的组件也抢不走，服务起来绑这个端口就是稳的。</p>
+
+        <div class="note warn">
+          <strong>* 前提：先把端口从动态保留里腾出来。</strong>如果这个端口已经落在 Hyper-V / WSL / Docker 的动态保留区间里，上面这条 <code>add</code> 会直接失败。这时候要先停掉 Windows 的 NAT 服务（停了它，那些动态保留区间才会释放），加完自己的预留，再把 NAT 服务启回来：
+        </div>
+
+        <pre><code>net stop winnat
+netsh int ipv4 add excludedportrange protocol=tcp startport=52781 numberofports=1
+net start winnat</code></pre>
+
+        <p>启回来的 NAT 服务会重新分配动态区间，而这次它会避开你已经预留的端口。注意 <code>net stop winnat</code> 会短暂影响 WSL / Docker / 虚拟机的网络，所以这套操作放在<strong>安装阶段、服务还没起的时候</strong>做最合适，别在运行中搞。</p>
+
+        <p>具体逻辑上还有几个要点：</p>
+
+        <ul>
+          <li><strong>先删后加。</strong>上一次安装可能已经预留过同一段区间，直接加会冲突。所以每次先尝试删除这个区间（删失败也无所谓），再重新添加，保证干净：</li>
+        </ul>
+
+        <pre><code>netsh int ipv4 delete excludedportrange protocol=tcp startport=52781 numberofports=1
+netsh int ipv4 add excludedportrange protocol=tcp startport=52781 numberofports=1</code></pre>
+
+        <ul>
+          <li><strong>时机要对。</strong>端口预留必须在服务启动之前完成，否则服务起的时候端口还没被保护，照样可能被别人抢走。顺序是：预留端口 → 再启动服务。</li>
+          <li><strong>要留排查痕迹。</strong>预留命令的返回码和输出要记到安装日志里。预留失败一般是因为端口已经被别的排除区间覆盖、权限不够（这条命令需要管理员权限），或者 NAT 服务没停干净，有日志下次出问题一眼能看出来。</li>
+        </ul>
+
+        <p>这套做法的好处是，把“排查问题”前置成了“预防问题”——不依赖运行时去抓异常、去重试，而是在部署阶段就把端口环境收拾干净。对于固定端口的常驻服务，这是最省心的方案。</p>
+      </section>
+
+      <section id="checklist">
+        <h2>7. 排查顺序</h2>
+        <p>真出了问题，按这个顺序走，基本不会绕远路：</p>
+        <ol>
+          <li>先 <code>netstat -ano | findstr :端口</code> 找有没有进程占着——有就 <code>taskkill</code> 处理掉。</li>
+          <li><code>netstat</code> 干干净净却绑不上——<code>netsh int ipv4 show excludedportrange protocol=tcp</code>，看端口是不是落在保留区间里。</li>
+          <li>频繁重启场景——看是不是 <code>TIME_WAIT</code>，等几分钟或开地址复用。</li>
+        </ol>
+
+        <div class="note">
+          <strong>记住一点：netstat 看不到占用者，不代表端口真的空闲。</strong>在 Windows 上，这往往正是排查的转折点。
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2026 zixuan
+  </footer>
+</body>
+</html>

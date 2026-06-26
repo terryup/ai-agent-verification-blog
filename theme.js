@@ -64,6 +64,61 @@
     applyTheme(current === DARK ? LIGHT : DARK);
   }
 
+  // ── Code block copy buttons ────────────────
+  function legacyCopy(text, done) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    done();
+  }
+
+  function enhanceCodeBlocks() {
+    document.querySelectorAll('.article-content pre').forEach(function (pre) {
+      if (pre.dataset.copyReady) return;
+      var code = pre.querySelector('code');
+      if (!code) return;
+      pre.dataset.copyReady = '1';
+
+      // Wrap so the copy button stays pinned during horizontal scroll.
+      var wrap = document.createElement('div');
+      wrap.className = 'pre-wrap';
+      pre.parentNode.insertBefore(wrap, pre);
+      wrap.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.type = 'button';
+      btn.setAttribute('aria-label', '复制命令');
+      btn.innerHTML =
+        '<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+        '<svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      btn.addEventListener('click', function () {
+        var text = code.innerText;
+        var finish = function () {
+          btn.classList.add('copied');
+          btn.setAttribute('aria-label', '已复制');
+          setTimeout(function () {
+            btn.classList.remove('copied');
+            btn.setAttribute('aria-label', '复制命令');
+          }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(finish).catch(function () {
+            legacyCopy(text, finish);
+          });
+        } else {
+          legacyCopy(text, finish);
+        }
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
   // ── System theme change listener ───────────
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
     if (!localStorage.getItem(STORAGE_KEY)) {
@@ -94,5 +149,6 @@
     applyTheme(theme);
     var toggle = document.getElementById('themeToggle');
     if (toggle) toggle.addEventListener('click', handleToggle);
+    enhanceCodeBlocks();
   });
 })();

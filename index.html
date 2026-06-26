@@ -220,15 +220,6 @@
       color: var(--accent);
     }
 
-    /* ── Featured post (first post, bigger) ────── */
-    .post.featured .post-title {
-      font-size: clamp(28px, 4vw, 42px);
-    }
-
-    .post.featured .post-excerpt {
-      font-size: 18px;
-    }
-
     /* ── Responsive ────────────────────────────── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
@@ -250,7 +241,6 @@
       .intro { padding: 48px 20px 32px; }
       .home-grid { padding: 0 20px 64px; }
       .post { padding: 32px 0; }
-      .post.featured .post-title { font-size: clamp(24px, 7vw, 32px); }
     }
   </style>
   <script src="theme.js"></script>
@@ -283,7 +273,25 @@
     <div class="newest">
       <p class="section-label">Latest</p>
 
-      <article class="post featured">
+      <article class="post">
+        <h2 class="post-title">
+          <a href="./windows-port-bind-failure-troubleshooting.html">Windows 上端口起不来怎么办？</a>
+        </h2>
+        <p class="post-subtitle">一个两三百次才撞一次、撞上只能重启的端口问题</p>
+        <p class="post-excerpt">
+          Windows 上服务端口偶尔起不来，日志报端口占用，重启服务没用、只能整机重启。这类问题背后通常是三类原因：被进程占用、落进系统保留区间、TIME_WAIT 残留。下面是通用的排查思路，以及在安装阶段把端口提前占下来、从根上避开的做法。
+        </p>
+        <a class="read-more" href="./windows-port-bind-failure-troubleshooting.html">
+          阅读全文
+          <span class="read-more-arrows">
+            <svg viewBox="0 0 8 12"><path d="M1 6h5M4 2l3 4-3 4"/></svg>
+            <svg viewBox="0 0 8 12"><path d="M1 6h5M4 2l3 4-3 4"/></svg>
+            <svg viewBox="0 0 8 12"><path d="M1 6h5M4 2l3 4-3 4"/></svg>
+          </span>
+        </a>
+      </article>
+
+      <article class="post">
         <h2 class="post-title">
           <a href="./ai-agent-verification.html">复杂工程里的 AI Agent：如何解决验证难题</a>
         </h2>
