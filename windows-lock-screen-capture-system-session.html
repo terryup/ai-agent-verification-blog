@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Windows 锁屏后采集为什么会黑屏：Session、Desktop、DXGI 与 SYSTEM 进程身份</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .article-hero::before {
+      background:
+        linear-gradient(
+          to top,
+          oklch(0.08 0.02 260 / 0.90) 0%,
+          oklch(0.12 0.04 265 / 0.58) 52%,
+          oklch(0.22 0.08 270 / 0.16) 100%
+        );
+    }
+
+    .article-layout,
+    .article-content,
+    .article-toc { min-width: 0; }
+
+    .toc-head {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .toc-head span {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .toc-head strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+      color: var(--text-primary);
+      overflow-wrap: anywhere;
+    }
+
+    .toc-links {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    section {
+      margin: 0 0 74px;
+      scroll-margin-top: 28px;
+    }
+
+    section:target h2 { color: var(--accent); }
+
+    .lead {
+      font-size: 18px;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+
+    .table-wrap {
+      max-width: 100%;
+      margin: 24px 0;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-sm);
+    }
+
+    table {
+      width: 100%;
+      min-width: 680px;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text-primary);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--bg-elevated);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    td { color: var(--text-secondary); }
+
+    .callout {
+      border: 1px solid oklch(0.55 0.25 260 / 0.28);
+      background: var(--accent-soft);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin: 24px 0;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .callout strong { color: var(--text-primary); }
+    .callout.ok { border-color: oklch(0.6 0.18 155 / 0.3); background: var(--success-soft); }
+    .callout.warn { border-color: oklch(0.75 0.15 80 / 0.3); background: var(--warning-soft); }
+    .callout.risk { border-color: oklch(0.55 0.22 25 / 0.3); background: var(--error-soft); }
+
+    .model {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin: 28px 0;
+    }
+
+    .model-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-sm);
+      padding: 18px;
+    }
+
+    .model-box b {
+      display: block;
+      color: var(--accent);
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .desktop-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .desktop {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-elevated);
+      padding: 14px;
+    }
+
+    .desktop strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .desktop span {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .desktop.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .chain {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 28px 0;
+    }
+
+    .chain-step {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      padding: 16px 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .chain-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-weight: 800;
+      z-index: 1;
+    }
+
+    .chain-step b {
+      display: block;
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+
+    .chain-step span {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 28px 0;
+    }
+
+    .compare-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .compare-card.good { border-color: var(--success); background: var(--success-soft); }
+    .compare-card.bad { border-color: var(--error); background: var(--error-soft); }
+    .compare-card h3 { margin-top: 0; font-size: 19px; }
+    .compare-card p { margin-bottom: 0; color: var(--text-secondary); }
+
+    @media (max-width: 860px) {
+      .desktop-row, .compare-grid { grid-template-columns: 1fr; }
+      .chain {
+        grid-template-columns: 1fr;
+        gap: 22px;
+      }
+      .chain-step:not(:last-child)::after {
+        content: "↓";
+        left: 50%;
+        right: auto;
+        top: auto;
+        bottom: -24px;
+        transform: translateX(-50%);
+      }
+    }
+  </style>
+  <script src="theme.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="./index.html" class="site-logo">zixuan</a>
+      <nav class="site-nav">
+        <a href="./index.html">Home</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <header class="article-hero">
+    <div class="hero-inner">
+      <h1>Windows 锁屏后采集为什么会黑屏：Session、Desktop、DXGI 与 SYSTEM 进程身份</h1>
+      <p class="subtitle">锁屏不是屏幕停了，而是 input desktop 变了。能不能继续采集，取决于进程身份、所在 Session，以及采集线程能否切到新的 Desktop 后重建 DXGI。</p>
+      <div class="hero-tags">
+        <span>Windows</span>
+        <span>DXGI</span>
+        <span>Desktop Duplication</span>
+        <span>进程身份</span>
+      </div>
+      <div class="byline">
+        <div class="byline-avatar">Z</div>
+        <span class="byline-name">zixuan</span>
+        <span class="byline-sep">·</span>
+        <span class="byline-date">2026 年 5 月 8 日</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="article-layout">
+    <aside class="article-toc" aria-label="文章目录">
+      <nav class="toc">
+        <div class="toc-head">
+          <span>目录</span>
+          <strong>从黑屏根因到 SYSTEM @ Session N</strong>
+        </div>
+        <div class="toc-links">
+          <a href="#problem">1. 黑屏不是低能耗问题</a>
+          <a href="#desktop-model">2. 三层桌面模型</a>
+          <a href="#dxgi">3. DXGI 为什么失效</a>
+          <a href="#system-session">4. SYSTEM @ Session N</a>
+          <a href="#runtime">5. 运行时恢复循环</a>
+          <a href="#single-worker">6. 为什么不拆双 Worker</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="article-content">
+      <section id="problem">
+        <h2>1. 锁屏黑屏不是低能耗问题</h2>
+        <p class="lead">Windows 锁屏后桌面采集变黑，常见误解是“屏幕关了”或“显卡没有输出”。真正的问题通常不是显示器，而是采集线程失去了当前 input desktop。</p>
+        <p>对基于 DXGI Desktop Duplication 的采集程序来说，锁屏瞬间最关键的变化是：系统把输入桌面从用户日常工作的 <code>Default</code> 切到安全桌面 <code>Winlogon</code>。旧的 duplication 实例会失效；如果进程没有权限打开新的 input desktop，就无法重建采集链路。</p>
+        <div class="callout">
+          <strong>一句话：</strong>锁屏黑屏的根因不是“没有帧”，而是“进程没有资格进入当前正在显示的安全桌面”。
+        </div>
+      </section>
+
+      <section id="desktop-model">
+        <h2>2. 先看懂 Session、Window Station、Desktop</h2>
+        <p>Windows 图形界面不是一个平面概念。它至少有三层：Session、Window Station、Desktop。</p>
+
+        <div class="model">
+          <div class="model-box">
+            <b>Session N：用户登录会话</b>
+            <p>真正有用户交互、GPU 上下文、音频端点和输入桌面的地方。远控、录屏、桌面采集通常要落在这里，而不是 Session 0。</p>
+            <div class="desktop-row">
+              <div class="desktop">
+                <strong>Default Desktop</strong>
+                <span>用户日常桌面，应用窗口主要在这里。</span>
+              </div>
+              <div class="desktop active">
+                <strong>Winlogon Desktop</strong>
+                <span>锁屏、UAC、Ctrl+Alt+Del 等安全界面。</span>
+              </div>
+              <div class="desktop">
+                <strong>Screen-saver Desktop</strong>
+                <span>屏保等特殊场景使用。</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="model-box">
+            <b>Session 0：服务隔离会话</b>
+            <p>服务默认在这里运行。它可以有很高权限，但不是用户正在看的图形会话。把采集进程简单放到 Session 0，通常拿不到用户桌面的真实画面。</p>
+          </div>
+        </div>
+
+        <p>锁屏动作的关键不是释放桌面资源，而是系统调用类似 <code>SwitchDesktop()</code> 的机制，把当前 input desktop 从 <code>Default</code> 切到 <code>Winlogon</code>。</p>
+      </section>
+
+      <section id="dxgi">
+        <h2>3. DXGI Desktop Duplication 为什么会失效</h2>
+        <p>DXGI Desktop Duplication 的性能很好，但它有一个硬前提：采集线程必须绑定到当前可访问的 input desktop。</p>
+        <p>锁屏发生时，典型链路是这样的：</p>
+
+        <div class="chain">
+          <div class="chain-step">
+            <b>用户 Win+L</b>
+            <span>系统进入锁屏流程。</span>
+          </div>
+          <div class="chain-step">
+            <b>切到 Winlogon</b>
+            <span>input desktop 改变。</span>
+          </div>
+          <div class="chain-step">
+            <b>Duplication 失效</b>
+            <span><code>AcquireNextFrame</code> 返回 <code>DXGI_ERROR_ACCESS_LOST</code>。</span>
+          </div>
+          <div class="chain-step">
+            <b>尝试重建</b>
+            <span>需要打开新的 input desktop。</span>
+          </div>
+          <div class="chain-step">
+            <b>权限失败</b>
+            <span>普通用户进程打不开 Winlogon Desktop。</span>
+          </div>
+        </div>
+
+        <p><code>Winlogon</code> Desktop 默认不是普通用户进程可以随便打开的对象。采集程序即使捕获到 <code>DXGI_ERROR_ACCESS_LOST</code>，如果 <code>OpenInputDesktop()</code> 被 ACL 拒绝，后面的 <code>SetThreadDesktop()</code> 和 D3D 重建就都走不下去。</p>
+
+        <div class="callout risk">
+          <strong>黑屏的关键断点：</strong>不是没有处理 <code>DXGI_ERROR_ACCESS_LOST</code>，而是处理到一半发现没有权限进入新的安全桌面。
+        </div>
+      </section>
+
+      <section id="system-session">
+        <h2>4. 为什么是 SYSTEM @ Session N</h2>
+        <p>要穿透锁屏，需要同时满足两个条件：</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>条件</th><th>为什么必须满足</th><th>错误做法</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SYSTEM 身份</td>
+                <td>有资格打开 Winlogon Desktop，完成 <code>OpenInputDesktop</code> / <code>SetThreadDesktop</code>。</td>
+                <td>普通用户进程留在 Session N，锁屏后重建失败。</td>
+              </tr>
+              <tr>
+                <td>位于用户 Session N</td>
+                <td>保留用户图形会话、GPU 上下文、设备可见性和音频端点。</td>
+                <td>服务进程待在 Session 0，权限高但不在用户桌面。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>这就是 <strong>SYSTEM @ Session N</strong> 的含义：身份是 SYSTEM，但进程位置在用户登录会话里。</p>
+        <p>实现上常见路径是：Root 服务在 Session 0 运行，找到目标用户会话里的 <code>winlogon.exe</code>，复制它的 SYSTEM token，再用 <code>CreateProcessAsUserW</code> 把 Worker 投递到对应用户 Session。</p>
+
+        <pre><code>Root service (Session 0, SYSTEM)
+  -> find winlogon.exe in active user session
+  -> OpenProcessToken + DuplicateTokenEx
+  -> CreateProcessAsUserW(token, desktop = "winsta0\\default")
+  -> Worker runs as SYSTEM @ Session N</code></pre>
+
+        <div class="callout ok">
+          <strong>这个组合很精确：</strong>SYSTEM 解决安全桌面权限，Session N 解决图形与设备上下文。少任何一半都不够。
+        </div>
+      </section>
+
+      <section id="runtime">
+        <h2>5. 真正的穿透发生在恢复循环里</h2>
+        <p>进程跑成 SYSTEM @ Session N 只是前置条件，不是最终答案。采集线程还必须在运行时处理桌面切换。</p>
+
+        <pre><code>while (running) {
+  frame = duplication.AcquireNextFrame();
+
+  if (frame == DXGI_ERROR_ACCESS_LOST) {
+    destroy_duplication_and_d3d();
+
+    HDESK desk = OpenInputDesktop(0, FALSE, GENERIC_ALL);
+    SetThreadDesktop(desk);
+
+    recreate_d3d_device();
+    recreate_duplication();
+    continue;
+  }
+
+  output(frame);
+}</code></pre>
+
+        <p>锁屏和解锁都会触发 desktop 切换，所以恢复逻辑不能只处理一次。它应该是一个稳定的 try-recover 循环：发现 duplication 失效，销毁旧资源，切到当前 input desktop，重建 D3D 和 duplication，再继续输出。</p>
+
+        <div class="callout">
+          <strong>验收标准要用用户语言描述：</strong>Win+L 锁屏 30 秒，远端拉流不黑屏，帧率不掉为 0；解锁后继续恢复到 Default Desktop。
+        </div>
+      </section>
+
+      <section id="single-worker">
+        <h2>6. 为什么不拆成双 Worker</h2>
+        <p>一个看似更安全的方案是拆成两个进程：CaptureWorker 用 SYSTEM 负责采集，UserWorker 用普通用户身份负责音频、外设和业务模块。</p>
+        <p>它符合“最小权限”的直觉，但放到音视频采集系统里，代价很高。</p>
+
+        <div class="compare-grid">
+          <div class="compare-card good">
+            <h3>单 Worker</h3>
+            <p>一个 SYSTEM @ Session N 进程承载采集、音频、外设和信令。锁屏穿透、用户切换和崩溃恢复都只有一个状态机。</p>
+          </div>
+          <div class="compare-card bad">
+            <h3>双 Worker</h3>
+            <p>Capture 和业务拆进程后，需要 IPC、共享内存、双进程生命周期、跨进程音频同步和版本兼容。</p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>维度</th><th>单 Worker</th><th>双 Worker</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>锁屏穿透</td><td>一个进程内处理 DXGI + Desktop 切换</td><td>CaptureWorker 仍然要做同样逻辑</td></tr>
+              <tr><td>PCM 音频</td><td>同进程分发，延迟和抖动可控</td><td>需要跨进程共享内存、同步原语和背压策略</td></tr>
+              <tr><td>多用户切换</td><td>旧 Worker 退出，新 Session 拉起一个 Worker</td><td>两个进程要同步切换、握手和恢复</td></tr>
+              <tr><td>调试</td><td>单进程日志和调用栈</td><td>双日志、跨进程时序、半通路状态</td></tr>
+              <tr><td>安全边界</td><td>一个高权限进程，攻击面较大</td><td>Capture 权限收敛，但工程代价显著上升</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>这里的关键判断是：如果实测证明 SYSTEM @ Session N 不破坏音频、COM、HID 和业务 SDK，那么双 Worker 的主要收益就变弱了，剩下的是一整套跨进程复杂度。</p>
+        <p>远控软件的成熟实现也基本印证这点：主流方案更倾向让一个位于用户会话的高权限进程承担采集、音频、剪贴板、文件传输等职责，而不是把低延迟媒体链路拆散。</p>
+        <div class="callout ok">
+          <strong>结论：</strong>锁屏采集不是单纯的 DXGI 问题，也不是单纯的权限问题。它是 Windows 图形会话模型、进程身份、桌面 ACL 和采集链路恢复机制共同作用的结果。
+        </div>
+
+        <p>真正稳的方案不是“把进程提权”这么粗暴，而是把身份、Session 位置和桌面切换恢复循环三件事同时做对：<strong>SYSTEM 身份负责进入安全桌面，用户 Session 负责保留图形上下文，采集线程负责在 desktop 切换后重建 DXGI。</strong></p>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2026 zixuan
+  </footer>
+</body>
+</html>
