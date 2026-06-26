@@ -279,15 +279,15 @@
 
     /* ── Callouts ─────────────────────────────── */
     .callout {
-      border-left: 4px solid var(--accent);
+      border: 1px solid oklch(0.74 0.18 186 / 0.32);
       background: var(--accent-soft);
       padding: 14px 16px;
       margin: 18px 0;
-      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      border-radius: var(--radius-md);
     }
 
     .callout.ok {
-      border-left-color: var(--success);
+      border-color: var(--success);
       background: color-mix(in srgb, var(--success) 8%, var(--bg-card));
     }
 

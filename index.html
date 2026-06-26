@@ -7,32 +7,346 @@
   <title>zixuan's blog</title>
   <link rel="stylesheet" href="shared.css" />
   <style>
-    /* ── Intro ─────────────────────────────────── */
+    /* ── Home: Signal-led technical journal ────── */
+    html {
+      scroll-snap-type: y proximity;
+    }
+
     .intro {
+      position: relative;
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 80px 32px 48px;
-      animation: fadeUp 600ms var(--ease-out) both;
+      min-height: calc(100vh - 72px);
+      padding: clamp(72px, 9vw, 120px) 32px clamp(56px, 7vw, 92px);
+      display: grid;
+      grid-template-columns: minmax(300px, 1fr) minmax(260px, 380px);
+      gap: clamp(32px, 6vw, 92px);
+      align-items: center;
+      overflow: hidden;
+      animation: fadeUp 700ms var(--ease-out) both;
+    }
+
+    .intro::before {
+      content: "";
+      position: absolute;
+      right: 32px;
+      top: 44px;
+      width: min(52vw, 680px);
+      aspect-ratio: 1;
+      border: 1px solid oklch(0.74 0.18 186 / 0.18);
+      background:
+        linear-gradient(90deg, transparent 49.5%, oklch(0.74 0.18 186 / 0.3) 49.5% 50.5%, transparent 50.5%),
+        linear-gradient(transparent 49.5%, oklch(0.74 0.18 186 / 0.24) 49.5% 50.5%, transparent 50.5%),
+        radial-gradient(circle, oklch(0.74 0.18 186 / 0.16), transparent 58%);
+      border-radius: 50%;
+      opacity: 0.62;
+      transform: rotate(-12deg);
+      pointer-events: none;
+      mask-image: linear-gradient(90deg, transparent, black 20%, black 82%, transparent);
+    }
+
+    .intro-copy,
+    .blog-mascot {
+      position: relative;
+      z-index: 1;
+    }
+
+    .intro-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+      color: var(--accent);
+      font: 700 13px/1 var(--font-mono);
+    }
+
+    .intro-kicker::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      box-shadow: 0 0 18px oklch(0.74 0.18 186 / 0.72);
     }
 
     .intro h1 {
-      font-size: clamp(36px, 5vw, 56px);
+      max-width: 11ch;
+      font-size: clamp(48px, 8vw, 96px);
       font-weight: 800;
-      line-height: 1.1;
+      line-height: 0.95;
       letter-spacing: -0.03em;
       color: var(--text-primary);
       text-wrap: balance;
     }
 
+    .domain-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      max-width: 620px;
+      margin-top: 30px;
+      list-style: none;
+    }
+
+    .domain-cloud span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid oklch(0.74 0.18 186 / 0.28);
+      border-radius: 8px;
+      background: oklch(1 0 0 / 0.045);
+      color: var(--text-secondary);
+      font: 700 13px/1 var(--font-mono);
+    }
+
+    .github-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      margin-top: 30px;
+      padding: 0 15px;
+      border: 1px solid oklch(0.74 0.18 186 / 0.34);
+      border-radius: 8px;
+      color: var(--text-primary);
+      background: linear-gradient(180deg, var(--bg-card), var(--bg-elevated));
+      font-weight: 800;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--duration-normal) var(--ease-out),
+                  border-color var(--duration-normal) var(--ease-out),
+                  box-shadow var(--duration-normal) var(--ease-out);
+    }
+
+    .github-link:hover {
+      color: var(--text-primary);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 18px 44px oklch(0.74 0.18 186 / 0.18);
+    }
+
+    .github-link svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .intro-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    .intro-actions .github-link,
+    .intro-actions .enter-blog {
+      margin-top: 0;
+    }
+
+    .stack-signal {
+      width: min(100%, 520px);
+      margin-top: 24px;
+      border: 1px solid oklch(0.74 0.18 186 / 0.24);
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, oklch(1 0 0 / 0.06), transparent),
+        oklch(0.1 0.026 252 / 0.5);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    .stack-signal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 13px 15px;
+      border-bottom: 1px solid oklch(0.74 0.18 186 / 0.16);
+      color: var(--text-tertiary);
+      font: 700 12px/1 var(--font-mono);
+    }
+
+    .stack-signal-head span:last-child {
+      color: var(--accent);
+    }
+
+    .stack-signal-body {
+      display: grid;
+      gap: 13px;
+      padding: 16px 15px;
+    }
+
+    .stack-meter {
+      display: grid;
+      grid-template-columns: 96px minmax(0, 1fr) 42px;
+      gap: 12px;
+      align-items: center;
+      color: var(--text-secondary);
+      font: 700 12px/1.3 var(--font-mono);
+    }
+
+    .stack-track {
+      height: 6px;
+      border-radius: 999px;
+      background: oklch(0.06 0.018 252 / 0.88);
+      box-shadow: inset 0 1px 2px oklch(0 0 0 / 0.45);
+      overflow: hidden;
+    }
+
+    .stack-track span {
+      display: block;
+      width: var(--value);
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--signal));
+      box-shadow: 0 0 18px oklch(0.74 0.18 186 / 0.52);
+      animation: pulseTrack 2800ms var(--ease-out) infinite;
+    }
+
+    .stack-meter:nth-child(2) .stack-track span { animation-delay: 160ms; }
+    .stack-meter:nth-child(3) .stack-track span { animation-delay: 320ms; }
+    .stack-meter:nth-child(4) .stack-track span { animation-delay: 480ms; }
+
+    .blog-mascot {
+      --look-x: 0px;
+      --look-y: 0px;
+      width: min(100%, 370px);
+      justify-self: center;
+      display: grid;
+      place-items: center;
+      transform: translate(var(--look-x), var(--look-y));
+      transition: transform 180ms var(--ease-out);
+    }
+
+    .pet-card {
+      position: relative;
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid oklch(0.86 0.16 88 / 0.28);
+      background:
+        radial-gradient(circle at 42% 28%, oklch(0.9 0.16 88 / 0.22), transparent 34%),
+        radial-gradient(circle at 68% 70%, oklch(0.72 0.21 333 / 0.18), transparent 32%),
+        linear-gradient(180deg, oklch(1 0 0 / 0.06), transparent);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      transform: rotate(var(--pet-rotate, 0deg));
+      transition: transform 180ms var(--ease-out), box-shadow 220ms var(--ease-out);
+    }
+
+    .pet-card::before {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      z-index: 1;
+      border: 1px solid oklch(0.86 0.16 88 / 0.18);
+      border-radius: 14px;
+      pointer-events: none;
+    }
+
+    .pet-card:hover {
+      box-shadow: 0 34px 90px oklch(0.86 0.16 88 / 0.18), var(--shadow-lg);
+    }
+
+    .pet-art {
+      width: 100%;
+      aspect-ratio: 1;
+      display: block;
+      overflow: visible;
+    }
+
+    /* head follows the cursor (rotate + drift, set via JS) */
+    .cat-head {
+      transform-box: view-box;
+      transform-origin: 64px 72px;
+      transform: rotate(var(--head-rotate, 0deg)) translate(var(--head-x, 0px), var(--head-y, 0px));
+      transition: transform 200ms var(--ease-out);
+    }
+
+    /* eyes follow the cursor (translate, set via JS) */
+    .cat-eyes {
+      transform: translate(var(--ex, 0px), var(--ey, 0px));
+      transition: transform 160ms var(--ease-out);
+    }
+
+    .pet-caption {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 14px;
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 11px;
+      border: 1px solid oklch(1 0 0 / 0.2);
+      border-radius: 10px;
+      background: oklch(0.08 0.02 252 / 0.72);
+      color: oklch(0.95 0.01 88);
+      font: 700 12px/1.3 var(--font-mono);
+    }
+
+    .home-page {
+      scroll-snap-align: start;
+      transform-origin: center top;
+    }
+
+    .page-turn-ready {
+      opacity: 0.72;
+      transform: rotateX(7deg) translateY(34px) scale(0.98);
+      transition:
+        opacity 760ms var(--ease-out),
+        transform 900ms var(--ease-out),
+        filter 900ms var(--ease-out);
+      filter: blur(5px);
+    }
+
+    .page-turn-ready.page-visible {
+      opacity: 1;
+      transform: rotateX(0deg) translateY(0) scale(1);
+      filter: blur(0);
+    }
+
+    .enter-blog {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      margin-top: 18px;
+      padding: 0 17px;
+      border: 1px solid oklch(0.86 0.16 88 / 0.45);
+      border-radius: 8px;
+      background: linear-gradient(180deg, oklch(0.92 0.16 88), oklch(0.72 0.15 65));
+      color: oklch(0.12 0.03 252);
+      font: 800 15px/1 var(--font-sans);
+      cursor: pointer;
+      box-shadow: 0 18px 44px oklch(0.86 0.16 88 / 0.18);
+      transition: transform var(--duration-normal) var(--ease-out),
+                  box-shadow var(--duration-normal) var(--ease-out);
+    }
+
+    .enter-blog:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 64px oklch(0.86 0.16 88 / 0.26);
+    }
+
+    .enter-blog::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg) translateY(-2px);
+    }
+
     /* ── Main Grid ─────────────────────────────── */
     .home-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
       grid-template-areas: "newest sidebar";
-      gap: 48px 80px;
+      gap: clamp(40px, 6vw, 88px);
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 0 32px 96px;
+      min-height: calc(100vh - 72px);
+      padding: clamp(56px, 7vw, 96px) 32px 112px;
     }
 
     /* ── Newest (left column) ──────────────────── */
@@ -41,19 +355,31 @@
     }
 
     .section-label {
-      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-tertiary);
+      color: var(--accent);
       margin-bottom: 32px;
+      font-family: var(--font-mono);
+    }
+
+    .section-label::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: linear-gradient(90deg, oklch(0.74 0.18 186 / 0.44), transparent);
     }
 
     /* ── Post (text-based, no cards) ───────────── */
     .post {
-      padding: 40px 0;
+      position: relative;
+      padding: 34px 0 34px 28px;
       border-bottom: 1px solid var(--border-subtle);
       animation: fadeUp 500ms var(--ease-out) both;
+      transition: border-color var(--duration-normal) var(--ease-out),
+                  transform var(--duration-normal) var(--ease-out);
     }
 
     .post:nth-child(2) { animation-delay: 100ms; }
@@ -61,18 +387,44 @@
     .post:nth-child(4) { animation-delay: 300ms; }
 
     .post:first-child {
-      padding-top: 0;
+      padding-top: 8px;
     }
 
     .post:last-child {
       border-bottom: none;
     }
 
+    .post::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 42px;
+      width: 9px;
+      height: 9px;
+      border: 1px solid var(--accent);
+      background: var(--bg-base);
+      box-shadow: 0 0 16px oklch(0.74 0.18 186 / 0.5);
+      transform: rotate(45deg);
+      transition: transform var(--duration-normal) var(--ease-out),
+                  background var(--duration-normal) var(--ease-out);
+    }
+
+    .post:hover {
+      transform: translateX(4px);
+      border-bottom-color: oklch(0.74 0.18 186 / 0.3);
+    }
+
+    .post:hover::before {
+      background: var(--accent);
+      transform: rotate(45deg) scale(1.22);
+    }
+
     .post-title {
-      font-size: clamp(24px, 3vw, 32px);
+      max-width: 880px;
+      font-size: clamp(25px, 3.2vw, 38px);
       font-weight: 800;
       line-height: 1.2;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
       margin-bottom: 12px;
       text-wrap: balance;
       transition: color var(--duration-fast) var(--ease-out);
@@ -90,10 +442,10 @@
 
     .post-subtitle {
       font-size: 16px;
-      color: var(--text-secondary);
+      color: var(--accent);
       line-height: 1.5;
       margin-bottom: 16px;
-      font-style: italic;
+      font-weight: 700;
     }
 
     .post-excerpt {
@@ -101,6 +453,7 @@
       line-height: 1.7;
       color: var(--text-secondary);
       margin-bottom: 20px;
+      max-width: 78ch;
     }
 
     /* ── Read more with arrow animation ────────── */
@@ -154,8 +507,15 @@
     }
 
     .sidebar-section {
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, oklch(1 0 0 / 0.06), transparent),
+        var(--bg-card);
+      padding: 20px;
       margin-bottom: 48px;
       animation: fadeUp 500ms var(--ease-out) 200ms both;
+      box-shadow: var(--shadow-sm);
     }
 
     .sidebar-section:nth-child(2) {
@@ -163,34 +523,37 @@
     }
 
     .sidebar-section h3 {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
-      color: var(--text-primary);
+      color: var(--accent);
       margin-bottom: 16px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--border-subtle);
+      font-family: var(--font-mono);
     }
 
     .category-list {
       list-style: none;
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .category-list a {
       display: block;
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 15px;
-      font-weight: 500;
+      padding: 6px 10px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
       color: var(--text-secondary);
       text-decoration: none;
       transition: all var(--duration-fast) var(--ease-out);
     }
 
     .category-list a:hover {
-      background: var(--bg-elevated);
+      border-color: var(--accent);
+      background: var(--accent-soft);
       color: var(--text-primary);
     }
 
@@ -210,6 +573,13 @@
       margin-bottom: 4px;
     }
 
+    .sidebar-note {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.65;
+      margin-top: -4px;
+    }
+
     .sidebar-post-title a {
       color: var(--text-primary);
       text-decoration: none;
@@ -226,21 +596,41 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes pulseTrack {
+      0%, 100% { filter: saturate(1); opacity: 0.78; }
+      50% { filter: saturate(1.3); opacity: 1; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .intro, .post, .sidebar-section { animation: none; }
       .read-more-arrows svg { transition: none; }
+      .blog-mascot,
+      .pet-card,
+      .page-turn-ready { transition: none; }
+      .cat-head,
+      .cat-eyes { transition: none; }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 760px) {
+      .intro {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
       .home-grid {
         grid-template-columns: 1fr;
         grid-template-areas: "newest" "sidebar";
         gap: 48px;
       }
 
-      .intro { padding: 48px 20px 32px; }
+      .intro { padding: 56px 20px 40px; }
+      .intro h1 { max-width: 100%; }
+      .blog-mascot {
+        width: min(78vw, 300px);
+        margin-top: 18px;
+      }
       .home-grid { padding: 0 20px 64px; }
-      .post { padding: 32px 0; }
+      .post { padding: 30px 0 30px 22px; }
     }
   </style>
   <script src="theme.js"></script>
@@ -264,11 +654,90 @@
     </div>
   </header>
 
-  <div class="intro">
-    <h1>zixuan's blog</h1>
-  </div>
+  <section class="intro home-page" aria-labelledby="home-title">
+    <div class="intro-copy">
+      <p class="intro-kicker">verification-first engineering journal</p>
+      <h1 id="home-title">zixuan's blog</h1>
+      <ul class="domain-cloud" aria-label="博客涉及领域">
+        <li><span>AI Agent</span></li>
+        <li><span>复杂工程</span></li>
+        <li><span>验证体系</span></li>
+        <li><span>测试架构</span></li>
+        <li><span>Windows / AV</span></li>
+        <li><span>DSL</span></li>
+      </ul>
+      <div class="intro-actions">
+        <a class="github-link" href="https://github.com/terryup/ai-agent-verification-blog" target="_blank" rel="noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.59 2 12.25c0 4.52 2.87 8.36 6.84 9.72.5.1.68-.22.68-.49l-.01-1.9c-2.78.62-3.37-1.22-3.37-1.22-.45-1.19-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.36 1.12 2.94.86.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.71 0 0 .84-.28 2.75 1.05A9.34 9.34 0 0 1 12 6.98c.85 0 1.7.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.4.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9l-.01 2.8c0 .27.18.59.69.49A10.08 10.08 0 0 0 22 12.25C22 6.59 17.52 2 12 2Z"/>
+          </svg>
+          GitHub
+        </a>
+        <button class="enter-blog" type="button" data-scroll-target="blog-list">进入 blog</button>
+      </div>
+      <div class="stack-signal" aria-label="技术关注比例">
+        <div class="stack-signal-head">
+          <span>stack signal</span>
+          <span>live mix</span>
+        </div>
+        <div class="stack-signal-body">
+          <div class="stack-meter" style="--value: 92%">
+            <span>AI Agent</span>
+            <div class="stack-track"><span></span></div>
+            <span>92%</span>
+          </div>
+          <div class="stack-meter" style="--value: 84%">
+            <span>Verification</span>
+            <div class="stack-track"><span></span></div>
+            <span>84%</span>
+          </div>
+          <div class="stack-meter" style="--value: 71%">
+            <span>Testing</span>
+            <div class="stack-track"><span></span></div>
+            <span>71%</span>
+          </div>
+          <div class="stack-meter" style="--value: 58%">
+            <span>Windows AV</span>
+            <div class="stack-track"><span></span></div>
+            <span>58%</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <main class="home-grid">
+    <div class="blog-mascot" aria-hidden="true">
+      <div class="pet-card">
+        <svg class="pet-art" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="一只会看着你的橘猫">
+          <g class="cat-head">
+            <!-- face -->
+            <path fill="#FFC022" d="M114.67 70.19C112.71 44.22 94.44 26.3 64 26.3S15.25 45.33 13.45 71.31c-1.05 15.14 4.58 28.63 15.91 36.32c7.46 5.07 17.88 7.88 34.77 7.88c17.18 0 27.03-3.71 34.49-8.73c12.43-8.35 17.18-21.67 16.05-36.59"/>
+            <!-- ears -->
+            <path fill="#FFC022" d="M53.72 42.6C46.3 23.4 30.1 10.34 23.87 8.39c-2.35-.74-5.3-.81-6.63 1.35c-3.36 5.45-7.66 22.95 1.85 47.78z"/>
+            <path fill="#FFD1D1" d="M36.12 34.21c1.54-1.29 2.29-2.55.6-5.16c-2.62-4.05-7.33-8.78-9.16-10.23c-3-2.38-5.32-3.18-6.21.65c-1.65 7.08-1.52 16.69.25 21.99c.62 1.87 2.54 2.86 4.02 1.57z"/>
+            <path fill="#FF9B31" d="M54.12 45.02c1.13.96 3.42.82 4.75-.72c1.61-1.87 3.29-8.17 2.24-17.91c-4.67.17-9.09.84-13.21 1.97c3.33 5.46 4.13 14.88 6.22 16.66m19.76 0c-1.13.96-3.42.82-4.75-.72c-1.61-1.87-3.29-8.17-2.24-17.91c4.67.17 9.09.84 13.21 1.97c-3.33 5.46-4.13 14.88-6.22 16.66"/>
+            <path fill="#FFC022" d="M79.9 29.22c8.08-12.41 19.38-20.75 24.07-22.24c2.32-.74 5.02-.62 6.34 1.55c3.32 5.45 6.13 22.24-.42 45.75L85.96 42.74z"/>
+            <path fill="#FFD1D1" d="M97.55 38.23c2.43 2.43 4.41 4.06 5.84 5.61c.95 1.03 2.69.56 2.97-.82c2.45-11.8 1.67-21.86 0-24.5c-.8-1.26-2.29-1.59-3.65-1.13c-2.44.81-8.66 5.45-13.05 12.22c-.51.79-.32 1.85.46 2.38c1.58 1.07 4.34 3.14 7.43 6.24"/>
+            <!-- nose -->
+            <path d="M55.67 77.75c-.05-3.08 4.37-4.55 8.54-4.62c4.18-.07 8.68 1.29 8.73 4.37s-5.22 7.13-8.54 7.13c-3.31 0-8.67-3.81-8.73-6.88"/>
+            <!-- whiskers -->
+            <path fill="none" stroke="#9E9E9E" stroke-linecap="round" stroke-miterlimit="10" stroke-width="3" d="M6.7 71.03c.34.41 4.41.35 14.36 5.07M2.9 82.86s6.42-2.24 17.46-.28M8.81 92.29s2.74-1.38 12.67-2.25m99.39-22.53s-3.41.33-13.94 6.34m15.49 4.64s-5.09-.36-16.05 1.97m14.08 8.59s-4.83-1.71-14.78-2.25"/>
+            <!-- eyes (follow the cursor) -->
+            <g class="cat-eyes">
+              <path fill="#000200" d="M96.09 66.37c-.34 5.51-3.76 8.54-7.65 8.54s-7.04-3.88-7.04-8.66s3.28-8.71 7.65-8.47c5.07.29 7.32 4.09 7.04 8.59M46 65.81c.78 5.61-1.58 9.03-5.49 9.82s-7.26-1.84-8.23-6.64c-.98-4.81.9-9.32 5.34-9.97c5.15-.75 7.74 2.2 8.38 6.79"/>
+            </g>
+            <!-- mouth -->
+            <path d="M44.99 85.16c-2.57 1.67.47 5.54 2.25 6.85s4.98 2.92 9.67 2.44c5.54-.56 7.13-4.69 7.13-4.69s1.97 4.6 8.82 4.79c6.95.19 9.1-3.57 10.04-4.69c.94-1.13 1.88-4.04.28-5.16c-1.6-1.13-2.72.28-4.41 2.63s-5.16 3.66-8.54 2.06s-3.57-7.04-3.57-7.04l-4.79.28s-.75 4.69-2.91 6.19s-7.32 1.88-9.48-1.41c-.95-1.46-2.33-3.66-4.49-2.25"/>
+          </g>
+        </svg>
+        <div class="pet-caption">
+          <span>cat mode</span>
+          <span>watching u</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="home-grid home-page" id="blog-list">
     <!-- Left: Article list -->
     <div class="newest">
       <p class="section-label">Latest</p>
@@ -404,6 +873,7 @@
     <aside class="sidebar">
       <div class="sidebar-section">
         <h3>Categories</h3>
+        <p class="sidebar-note">主题不是标签墙，而是这套博客长期追踪的工程问题域。</p>
         <ul class="category-list">
           <li><a href="#">复杂工程</a></li>
           <li><a href="#">AI Agent</a></li>
@@ -455,5 +925,60 @@
   <footer class="site-footer">
     &copy; 2025 zixuan
   </footer>
+
+  <script>
+  // ── Mascot: head + eyes follow the cursor ──
+  (function () {
+    var mascot = document.querySelector('.blog-mascot');
+    var svg = mascot && mascot.querySelector('.pet-art');
+    if (!mascot || !svg) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var MAXTILT = 7;   // head rotate (deg)
+    var HEAD = 3;      // head drift (SVG units, 128 viewBox)
+    var EYE = 3.2;     // eye drift (SVG units)
+    var PARA = 7;      // whole-mascot parallax (px)
+    var raf = 0;
+
+    function apply(x, y) {
+      var r = mascot.getBoundingClientRect();
+      var cx = r.left + r.width / 2;
+      var cy = r.top + r.height * 0.52;   // roughly the eye line
+      var dx = x - cx, dy = y - cy;
+      var dist = Math.hypot(dx, dy) || 1;
+      var nx = dx / dist, ny = dy / dist;
+      var eg = Math.min(1, dist / 50);    // eyes react quickly
+      var hg = Math.min(1, dist / 200);   // head follows lazily
+      svg.style.setProperty('--head-rotate', (nx * MAXTILT * hg).toFixed(2) + 'deg');
+      svg.style.setProperty('--head-x', (nx * HEAD * hg).toFixed(2) + 'px');
+      svg.style.setProperty('--head-y', (ny * HEAD * hg).toFixed(2) + 'px');
+      svg.style.setProperty('--ex', (nx * EYE * eg).toFixed(2) + 'px');
+      svg.style.setProperty('--ey', (ny * EYE * eg).toFixed(2) + 'px');
+      mascot.style.setProperty('--look-x', (nx * PARA * hg).toFixed(2) + 'px');
+      mascot.style.setProperty('--look-y', (ny * PARA * hg).toFixed(2) + 'px');
+      raf = 0;
+    }
+
+    function onMove(e) {
+      if (raf) return;
+      var x = e.clientX, y = e.clientY;
+      raf = requestAnimationFrame(function () { apply(x, y); });
+    }
+
+    function reset() {
+      svg.style.setProperty('--head-rotate', '0deg');
+      svg.style.setProperty('--head-x', '0px');
+      svg.style.setProperty('--head-y', '0px');
+      svg.style.setProperty('--ex', '0px');
+      svg.style.setProperty('--ey', '0px');
+      mascot.style.setProperty('--look-x', '0px');
+      mascot.style.setProperty('--look-y', '0px');
+    }
+
+    window.addEventListener('pointermove', onMove, { passive: true });
+    document.addEventListener('mouseleave', reset);
+    window.addEventListener('blur', reset);
+  })();
+  </script>
 </body>
 </html>
