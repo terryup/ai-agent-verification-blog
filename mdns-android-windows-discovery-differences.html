@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>mDNS 在 Android 与 Windows 上有什么不同：为什么 Android 收到设备消息会慢</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .article-hero::before {
+      background:
+        linear-gradient(
+          to top,
+          oklch(0.1 0.01 260 / 0.88) 0%,
+          oklch(0.12 0.02 250 / 0.54) 52%,
+          oklch(0.22 0.05 220 / 0.16) 100%
+        );
+    }
+
+    .toc-head {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .toc-head span {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .toc-head strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .toc-links {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    section {
+      margin: 0 0 74px;
+      scroll-margin-top: 28px;
+    }
+
+    section:target h2 {
+      color: var(--accent);
+    }
+
+    .lead {
+      font-size: 18px;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+
+    .note {
+      border: 1px solid oklch(0.55 0.25 260 / 0.28);
+      background: var(--accent-soft);
+      border-radius: 8px;
+      padding: 18px 20px;
+      margin: 24px 0;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .note strong {
+      color: var(--text-primary);
+    }
+
+    .note.warn {
+      border-color: oklch(0.75 0.15 80 / 0.34);
+      background: var(--warning-soft);
+    }
+
+    .table-wrap {
+      margin: 24px 0;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-sm);
+    }
+
+    table {
+      width: 100%;
+      min-width: 720px;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text-primary);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--bg-elevated);
+    }
+
+    td {
+      color: var(--text-secondary);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin: 28px 0;
+    }
+
+    .model-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .model-card h3 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .model-card p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .model-card.good {
+      border-color: var(--success);
+      background: color-mix(in srgb, var(--success) 8%, var(--bg-card));
+    }
+
+    .model-card.warn {
+      border-color: var(--warning);
+      background: color-mix(in srgb, var(--warning) 9%, var(--bg-card));
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin: 28px 0;
+    }
+
+    .flow-step {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      padding: 14px 12px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      min-height: 102px;
+    }
+
+    .flow-step b {
+      display: block;
+      color: var(--text-primary);
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .flow-step span {
+      display: block;
+      margin-top: 6px;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 28px 0;
+    }
+
+    .timeline-col {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .timeline-col h3 {
+      margin: 0 0 16px;
+      font-size: 18px;
+    }
+
+    .timeline-item {
+      border-left: 2px solid var(--accent);
+      padding: 0 0 18px 14px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-item b {
+      display: block;
+      color: var(--text-primary);
+      font-size: 14px;
+      margin-bottom: 3px;
+    }
+
+    .source-list {
+      margin-top: 18px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 820px) {
+      .model-grid,
+      .timeline {
+        grid-template-columns: 1fr;
+      }
+
+      .flow {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+  <script src="theme.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="./index.html" class="site-logo">zixuan</a>
+      <nav class="site-nav">
+        <a href="./index.html">Home</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <header class="article-hero">
+    <div class="hero-inner">
+      <h1>mDNS 在 Android 与 Windows 上有什么不同：为什么 Android 收到设备消息会慢</h1>
+      <p class="subtitle">同样是局域网服务发现，Windows 侧通常是应用自己发包、收包、整理结果；Android 侧更多是把发现交给系统，再等系统回调。这个差异会直接影响设备上线、下线消息到达应用的速度。</p>
+      <div class="hero-tags">
+        <span>mDNS</span>
+        <span>Android NSD</span>
+        <span>Windows Socket</span>
+        <span>实时性</span>
+      </div>
+      <div class="byline">
+        <div class="byline-avatar">Z</div>
+        <span class="byline-name">zixuan</span>
+        <span class="byline-sep">·</span>
+        <span class="byline-date">2025 年 8 月 28 日</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="article-layout">
+    <aside class="article-toc" aria-label="文章目录">
+      <nav class="toc">
+        <div class="toc-head">
+          <span>目录</span>
+          <strong>同一个协议，两种开发体验</strong>
+        </div>
+        <div class="toc-links">
+          <a href="#problem">1. 先看问题</a>
+          <a href="#windows">2. Windows 怎么做</a>
+          <a href="#android">3. Android 怎么做</a>
+          <a href="#realtime">4. Android 为什么慢</a>
+          <a href="#state">5. 上线和下线怎么判断</a>
+          <a href="#conclusion">结尾. callback 不是实时状态</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="article-content">
+      <section id="problem">
+        <h2>1. 先看问题：协议一样，体验不一样</h2>
+        <p class="lead">Android 和 Windows 都可以用 mDNS/DNS-SD 做局域网设备发现，但写代码时会明显感觉到：Windows 更像一次主动扫描，Android 更像等系统通知。</p>
+        <p>mDNS 本身并不复杂：设备在局域网里广播服务信息，客户端通过多播查询和响应找到它。一个设备通常会拆成几类 DNS 记录返回，比如 <code>PTR</code> 告诉你服务实例，<code>SRV</code> 告诉你主机名和端口，<code>A/AAAA</code> 告诉你 IP，<code>TXT</code> 放一些额外信息。</p>
+        <p>问题在于：这些记录不是一次性完整返回的，可能先到一部分，晚点再到另一部分。Windows 和 Android 对这件事的处理方式不一样，于是设备消息到达应用的时间也不一样。</p>
+
+        <div class="model-grid">
+          <div class="model-card good">
+            <h3>Windows/C++ 自实现</h3>
+            <p>应用自己打开 socket，自己发送查询，自己收包，然后把零散记录拼成完整设备信息。复杂，但什么时候扫、扫多久都由应用决定。</p>
+          </div>
+          <div class="model-card warn">
+            <h3>Android NsdManager</h3>
+            <p>应用告诉系统“帮我找这个服务”，系统找到后再通过 listener 回调通知应用。简单，但什么时候通知、通知是否及时，应用不能完全控制。</p>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>核心判断：</strong>差异不在 mDNS 协议，而在平台给应用的控制权。Windows 侧更接近“我现在去扫一遍”，Android 侧更接近“系统发现了再告诉我”。
+        </div>
+      </section>
+
+      <section id="windows">
+        <h2>2. Windows 怎么做：应用自己扫</h2>
+        <p>在当前 C++ 实现里，Windows 侧使用 <code>mdns</code> 库直接处理查询和响应。可以把它理解成应用自己发起一次扫描：</p>
+
+        <div class="flow">
+          <div class="flow-step"><b>枚举网卡</b><span>获取本机 IPv4 地址</span></div>
+          <div class="flow-step"><b>打开 socket</b><span>每个地址绑定一个客户端 socket</span></div>
+          <div class="flow-step"><b>发送 PTR</b><span>查询目标 service type</span></div>
+          <div class="flow-step"><b>select 收包</b><span>在 timeout 内持续接收</span></div>
+          <div class="flow-step"><b>聚合记录</b><span>输出完整服务快照</span></div>
+        </div>
+
+        <pre><code>auto start_time = std::chrono::steady_clock::now();
+auto timeout_duration = std::chrono::milliseconds(timeout_ms_);
+
+while (std::chrono::steady_clock::now() - start_time &lt; timeout_duration) {
+  select(nfds, &amp;readfs, nullptr, nullptr, &amp;tv);
+  mdns_query_recv(sock, buffer.data(), buffer.size(), queryCallback, this, query_id);
+}</code></pre>
+
+        <p>这个模型很好理解：应用给自己一个时间窗口，比如 3 秒。在这 3 秒里，应用不断收 mDNS 包，收到多少算多少，最后把能拼完整的设备返回出去。</p>
+        <p>它的缺点是代码复杂。应用要处理多网卡、socket、超时、重复包、记录乱序。优点也很直接：想更快发现，就可以缩短扫描间隔；想收得更完整，就可以拉长接收窗口。实时性是可以通过参数调的。</p>
+
+        <div class="note warn">
+          <strong>Windows 侧不是天然更实时，而是更可控。</strong>应用自己决定扫描频率和超时时间，所以可以在“发现速度”和“资源消耗”之间做取舍。
+        </div>
+      </section>
+
+      <section id="android">
+        <h2>3. Android 怎么做：系统帮你找</h2>
+        <p>Android 常见做法是通过 <code>NsdManager</code> 发起服务发现。应用调用 <code>discoverServices()</code> 后，不再直接接触 socket 和 DNS 包，而是等系统通过 <code>DiscoveryListener</code> 回调。</p>
+
+        <pre><code>nsdManager.discoverServices(
+  "_edgeBoxAgent._tcp.",
+  NsdManager.PROTOCOL_DNS_SD,
+  discoveryListener
+);</code></pre>
+
+        <p>典型事件流是：</p>
+
+        <div class="flow">
+          <div class="flow-step"><b>discover</b><span>启动系统发现会话</span></div>
+          <div class="flow-step"><b>onServiceFound</b><span>收到服务出现事件</span></div>
+          <div class="flow-step"><b>resolve</b><span>解析 host、port、属性</span></div>
+          <div class="flow-step"><b>onServiceResolved</b><span>拿到可连接信息</span></div>
+          <div class="flow-step"><b>onServiceLost</b><span>收到服务消失事件</span></div>
+        </div>
+
+        <p>这套封装的好处很明显：应用不用自己收包，不用解析 DNS 记录，也不用关心多网卡。系统告诉你发现了服务，你再去 resolve，拿到 host、port 等信息。</p>
+        <p>但代价也在这里：应用拿到的不是原始 mDNS 包，而是系统处理后的回调。从设备发出广播，到应用收到 <code>onServiceFound</code> 或 <code>onServiceLost</code>，中间多了一层系统调度和缓存。</p>
+      </section>
+
+      <section id="realtime">
+        <h2>4. Android 为什么会慢：不是协议慢，是中间层多</h2>
+        <p>Android 上设备消息不够及时，很多时候不是 mDNS 协议慢，而是应用没有直接控制发现过程。系统什么时候发查询、什么时候认为服务丢失、什么时候把回调派发给应用，都不完全由应用决定。</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>影响点</th><th>表现</th><th>对实时性的影响</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>onServiceFound</code> 不是完整结果</td>
+                <td>发现服务后通常还要再 resolve</td>
+                <td>收到 found 之后，还要等 resolve 成功才能真正使用</td>
+              </tr>
+              <tr>
+                <td>系统托管 discovery</td>
+                <td>应用不能直接控制 query 重发节奏和收包窗口</td>
+                <td>应用很难像 Windows 自实现那样精确压低扫描延迟</td>
+              </tr>
+              <tr>
+                <td>回调调度</td>
+                <td>事件需要经过系统服务和应用线程执行</td>
+                <td>设备已经上线，但应用层 callback 可能稍后才到</td>
+              </tr>
+              <tr>
+                <td>缓存与丢失判断</td>
+                <td><code>onServiceLost</code> 依赖系统内部状态判断</td>
+                <td>设备已经下线，但 lost callback 不一定马上到</td>
+              </tr>
+              <tr>
+                <td>Wi-Fi 多播策略</td>
+                <td>多播接收可能受系统过滤、省电和网络状态影响</td>
+                <td>后台、弱网、网络切换时延迟更明显</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>所以 Android 的关键问题不是"有没有 callback"，而是 callback 到底代表什么。它代表系统在某个时刻通知应用“我发现服务状态变了”，不代表应用看到了每一个 mDNS 包，也不代表这是设备变化发生的第一时间。</p>
+
+        <div class="note">
+          <strong>不要把 Android NSD callback 当成实时设备消息。</strong><code>onServiceFound</code> 和 <code>onServiceLost</code> 更像系统整理后的通知，而不是设备上线/下线瞬间的原始信号。
+        </div>
+
+        <p>这也是为什么一些 Android 侧实现看起来会“慢半拍”：服务端可能已经广播了，mDNS 包也可能已经在网络里了，但应用收到的是系统封装、调度之后的事件。</p>
+      </section>
+
+      <section id="state">
+        <h2>5. 上线和下线怎么判断</h2>
+        <p>Windows 和 Android 还有一个很实际的差异：设备列表是怎么维护出来的。</p>
+
+        <div class="timeline">
+          <div class="timeline-col">
+            <h3>Windows：快照差异</h3>
+            <div class="timeline-item">
+              <b>scan N</b>
+              得到一组完整服务记录。
+            </div>
+            <div class="timeline-item">
+              <b>scan N+1</b>
+              再次扫描得到新的服务记录。
+            </div>
+            <div class="timeline-item">
+              <b>diff</b>
+              通过前后两次结果比较，判断谁新增了、谁消失了。
+            </div>
+          </div>
+          <div class="timeline-col">
+            <h3>Android：事件累积</h3>
+            <div class="timeline-item">
+              <b>onServiceFound</b>
+              把服务加入本地设备列表。
+            </div>
+            <div class="timeline-item">
+              <b>onServiceResolved</b>
+              补齐 host、port 等连接信息。
+            </div>
+            <div class="timeline-item">
+              <b>onServiceLost</b>
+              从本地设备列表移除，或者标记为可能离线。
+            </div>
+          </div>
+        </div>
+
+        <p>Windows 的快照模型很直观：我扫一次，得到一份列表；过一会儿再扫一次，再得到一份列表。两份列表一对比，就知道哪些设备新增、哪些设备消失。</p>
+        <p>Android 的事件模型更依赖系统回调：系统告诉你 found，就加入列表；系统告诉你 lost，就移除列表。问题是，如果 lost 来得晚，本地列表就会短时间保留一个已经离线的设备。</p>
+
+        <div class="note warn">
+          <strong>这就是 Android 侧容易出现“不够实时”的地方。</strong>上线慢，是 found 和 resolve 之间有延迟；下线慢，是 lost 不一定马上到。最终看到的不是设备状态本身，而是系统什么时候把状态变化通知给应用。
+        </div>
+      </section>
+
+      <section id="conclusion">
+        <h2>结尾. 不要把 callback 当实时状态</h2>
+        <p>同样是 mDNS，Android 和 Windows 的差异并不只是 API 写法不同。Windows 侧更像应用主动扫描，复杂但可控；Android 侧更像系统代替应用发现设备，简单但不够可控。</p>
+        <p>如果只是展示“附近有哪些设备”，Android 的封装通常够用。但如果设备列表会影响连接、路由或健康判断，就不能把 <code>onServiceFound</code> 和 <code>onServiceLost</code> 当成强实时状态。</p>
+        <p>更稳的判断方式是：mDNS 只负责发现入口，设备是否真的可用，还要结合连接探测或健康检测。尤其在 Android 上，callback 到达应用的时间，本身就是一个不稳定因素。</p>
+
+        <div class="source-list">
+          参考：<a href="https://developer.android.com/develop/connectivity/wifi/use-nsd">Android Network Service Discovery</a>、
+          <a href="https://developer.android.com/reference/android/net/nsd/NsdManager">Android NsdManager API</a>、
+          <a href="https://developer.android.com/reference/android/net/wifi/WifiManager.MulticastLock">WifiManager.MulticastLock</a>。
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2026 zixuan
+  </footer>
+</body>
+</html>
