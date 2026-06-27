@@ -21,7 +21,7 @@
     <rect x="528" y="236" width="344" height="172" rx="30" fill="#E8E8F0"/>
     <text x="700" y="292" text-anchor="middle" fill="#1E1E32" font-size="29" font-weight="900">Agent 的盲区</text>
     <text x="700" y="334" text-anchor="middle" fill="#333348" font-size="18">代码能生成，但证据不自动出现</text>
-    <text x="700" y="370" text-anchor="middle" fill=”#2563EB” font-size=”17” font-weight=”900”>需要人为把”不可证明”转成”可取证”</text>
+    <text x="700" y="370" text-anchor="middle" fill="#2563EB" font-size="17" font-weight="900">需要人为把“不可证明”转成“可取证”</text>
 
     <g>
       <rect x="128" y="222" width="300" height="138" rx="24" fill="#1E1E32" stroke="#EF4444"/>
