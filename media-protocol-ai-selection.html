@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI 采集流协议怎么选？</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    /* ── Article-specific hero ─────────────────── */
+    .article-hero::before {
+      background:
+        linear-gradient(
+          to top,
+          oklch(0.1 0.01 260 / 0.88) 0%,
+          oklch(0.12 0.02 250 / 0.56) 50%,
+          oklch(0.16 0.04 210 / 0.18) 100%
+        );
+    }
+
+    .hero-art {
+      position: absolute;
+      inset: 0 0 auto auto;
+      width: min(56vw, 760px);
+      height: 100%;
+      opacity: 0.55;
+      z-index: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    /* ── TOC ───────────────────────────────────── */
+    .toc-head {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .toc-head span {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .toc-head strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .toc-links {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    section {
+      margin: 0 0 74px;
+      scroll-margin-top: 28px;
+    }
+
+    section:target h2 {
+      color: var(--accent);
+    }
+
+    .lead {
+      font-size: 18px;
+      line-height: 1.75;
+      color: var(--text-primary);
+    }
+
+    /* ── Figure ────────────────────────────────── */
+    .figure {
+      margin: 34px 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .figure-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+
+    .figure-title strong { font-size: 18px; }
+    .figure-title span { color: var(--text-secondary); font-size: 14px; font-weight: 700; }
+    .figure-body { padding: 24px; }
+
+    /* ── Cards ─────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .four-col {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card h4 { margin: 0 0 10px; font-size: 18px; line-height: 1.35; }
+    .card p { margin: 0; color: var(--text-secondary); font-size: 15px; }
+    .good { border-color: var(--success); background: color-mix(in srgb, var(--success) 8%, var(--bg-card)); }
+    .warn { border-color: var(--warning); background: color-mix(in srgb, var(--warning) 8%, var(--bg-card)); }
+    .accent-card { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg-card)); }
+    .purple-card { border-color: var(--violet); background: color-mix(in srgb, var(--violet) 8%, var(--bg-card)); }
+    .good h4 { color: var(--success); }
+    .warn h4 { color: var(--warning); }
+    .accent-card h4 { color: var(--accent); }
+    .purple-card h4 { color: var(--violet); }
+
+    .protocol-card b {
+      display: inline-flex;
+      margin-bottom: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-family: var(--font-mono);
+    }
+
+    .protocol-card.good b { background: var(--success-soft); color: var(--success); }
+    .protocol-card.warn b { background: var(--warning-soft); color: var(--warning); }
+    .protocol-card.purple-card b { background: var(--violet-soft); color: var(--violet); }
+
+    /* ── Flow ──────────────────────────────────── */
+    .problem-flow {
+      display: grid;
+      grid-template-columns: 1fr 40px 1fr 40px 1fr;
+      align-items: stretch;
+      margin: 28px 0;
+    }
+    .pf-box { border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); padding: 18px; display: flex; flex-direction: column; gap: 6px; box-shadow: var(--shadow-sm); }
+    .pf-box.pf-decision { border-color: var(--accent); background: var(--accent-soft); }
+    .pf-box b { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 4px; }
+    .pf-box.pf-decision b { color: var(--accent); }
+    .pf-box span { font-size: 14px; color: var(--text-primary); line-height: 1.5; }
+    .pf-box small { color: var(--text-secondary); font-size: 13px; }
+    .pf-arrow { display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 22px; font-weight: 700; }
+
+    .mini-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 28px 0; }
+    .mini-summary div { border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); }
+    .mini-summary b { display: block; color: var(--accent); font-size: 17px; margin-bottom: 6px; }
+    .mini-summary span { color: var(--text-secondary); font-size: 14px; line-height: 1.5; }
+
+    /* ── SVG Diagrams ─────────────────────────── */
+    .svg-panel {
+      border: 1px solid var(--svg-border);
+      background: linear-gradient(180deg, var(--svg-card) 0%, var(--svg-bg) 100%);
+      border-radius: 8px;
+      margin: 22px 0;
+      overflow-x: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .svg-diagram {
+      display: block;
+      width: 100%;
+      min-width: 920px;
+      height: auto;
+    }
+
+    .svg-title {
+      font: 700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: var(--svg-text);
+    }
+
+    .svg-subtitle {
+      font: 500 13px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: var(--svg-text-secondary);
+    }
+
+    .svg-label {
+      font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: var(--svg-text);
+    }
+
+    .svg-small {
+      font: 500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      fill: var(--svg-text-secondary);
+    }
+
+    .matrix-table td:first-child,
+    .matrix-table th:first-child {
+      width: 24%;
+      font-weight: 700;
+    }
+
+    .article-content .matrix-table {
+      margin: 24px 0;
+      border: 1px solid var(--border);
+      border-collapse: collapse;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-sm);
+      font-size: 15px;
+    }
+
+    .article-content .matrix-table th,
+    .article-content .matrix-table td {
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .article-content .matrix-table th {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .article-content .matrix-table td {
+      color: var(--text-secondary);
+    }
+
+    .article-content .matrix-table td:first-child {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    @media (max-width: 860px) {
+      .four-col { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .two-col, .four-col, .mini-summary { grid-template-columns: 1fr; }
+      .problem-flow { grid-template-columns: 1fr; gap: 8px; }
+      .pf-arrow { transform: rotate(90deg); height: 28px; }
+      .figure-title { display: block; }
+      .figure-title span { display: block; margin-top: 6px; }
+      .hero-art { width: 100%; opacity: 0.35; }
+    }
+  </style>
+  <script src="theme.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="./index.html" class="site-logo">zixuan</a>
+      <nav class="site-nav">
+        <a href="./index.html">Home</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+          <svg class="sun-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg class="moon-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <header class="article-hero">
+    <svg class="hero-art" viewBox="0 0 760 520" fill="none" aria-hidden="true">
+      <defs>
+        <pattern id="streamGrid" width="58" height="58" patternUnits="userSpaceOnUse">
+          <path d="M58 0H0V58" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1"/>
+        </pattern>
+        <linearGradient id="streamGlow" x1="80" y1="62" x2="706" y2="458" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#7DD3FC" stop-opacity="0.7"/>
+          <stop offset="1" stop-color="#5EEAD4" stop-opacity="0.28"/>
+        </linearGradient>
+      </defs>
+      <rect width="760" height="520" fill="url(#streamGrid)"/>
+      <path d="M110 144C210 64 290 76 386 148C480 218 558 218 664 144" stroke="url(#streamGlow)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M112 262C214 182 294 194 388 264C482 334 560 334 664 262" stroke="url(#streamGlow)" stroke-width="6" stroke-linecap="round" opacity="0.72"/>
+      <path d="M112 380C214 300 294 312 388 382C482 452 560 452 664 380" stroke="url(#streamGlow)" stroke-width="6" stroke-linecap="round" opacity="0.46"/>
+      <g fill="#ffffff" fill-opacity="0.15" stroke="#ffffff" stroke-opacity="0.55">
+        <rect x="114" y="102" width="92" height="52" rx="12"/>
+        <rect x="334" y="222" width="92" height="52" rx="12"/>
+        <rect x="572" y="342" width="92" height="52" rx="12"/>
+      </g>
+      <g fill="#ffffff">
+        <circle cx="160" cy="128" r="5"/>
+        <circle cx="380" cy="248" r="5"/>
+        <circle cx="618" cy="368" r="5"/>
+      </g>
+    </svg>
+    <div class="hero-inner">
+      <h1>AI 采集流协议怎么选？</h1>
+      <p class="subtitle">同样是把音视频从采集服务送到业务侧，四种协议解决的不是同一个问题。AI 如果主要消费 TS 切片，HLS 或 HTTP-TS 往往比 RTSP 更直接；如果消费帧、时间戳和关键帧，私有 RTC 才是更合适的主通道。</p>
+      <div class="hero-tags">
+        <span>HTTP-TS</span>
+        <span>HLS</span>
+        <span>RTSP</span>
+        <span>私有 RTC</span>
+        <span>AI 切片</span>
+      </div>
+      <div class="byline">
+        <div class="byline-avatar">Z</div>
+        <span class="byline-name">zixuan</span>
+        <span class="byline-sep">·</span>
+        <span class="byline-date">2026 年 6 月 30 日</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="article-layout">
+    <aside class="article-toc" aria-label="文章目录">
+      <nav class="toc">
+        <div class="toc-head">
+          <span>目录</span>
+          <strong>从协议原理，到 AI 切片选型</strong>
+        </div>
+        <div class="toc-links">
+          <a href="#opening">0. 先把问题问准</a>
+          <a href="#principle">1. 四种协议的原理</a>
+          <a href="#comparison">2. 它们真正的差异</a>
+          <a href="#slicing">3. AI 切片怎么理解</a>
+          <a href="#decision">4. AI 业务怎么选</a>
+          <a href="#project">5. 放到项目里怎么落地</a>
+          <a href="#conclusion">结尾. 一个判断口诀</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="article-content">
+      <section id="opening">
+        <p class="lead">协议选型最容易陷入一个误区：先问哪个协议延迟最低、生态最好、最容易接。但对 AI 业务来说，更重要的问题是：算法到底消费什么？是连续实时流、TS 容器、服务端切好的分片，还是带时间戳和关键帧标记的编码包？</p>
+        <div class="note">
+          <strong>本文的核心结论：</strong>如果 AI 业务的输入单位就是 TS 切片，优先看 HLS 或 HTTP-TS；如果 AI 业务需要帧级控制、低延迟、时间戳对齐和关键帧管理，优先看项目内私有 RTC；RTSP 则更适合作为标准实时流兼容层。
+        </div>
+      </section>
+
+      <section id="principle">
+        <h2>1. 四种协议的原理</h2>
+        <p>HTTP-TS、HLS、RTSP 和私有 RTC 都能承载音视频，但它们的基本模型完全不同：有的是播放协议，有的是传输封装，有的是实时控制协议，有的是业务数据通道。</p>
+
+        <div class="four-col">
+          <div class="card protocol-card good">
+            <b>HLS</b>
+            <h4>播放列表 + 分片</h4>
+            <p>服务端持续生成 <code>.m3u8</code> 和 <code>.ts</code> 或 fMP4 分片，客户端轮询播放列表并下载最新分片。</p>
+          </div>
+          <div class="card protocol-card warn">
+            <b>HTTP-TS</b>
+            <h4>HTTP 承载 TS 流</h4>
+            <p>客户端通过一个 HTTP URL 读取 TS 形态的数据流，链路比 HLS 更直接，但没有 m3u8 的索引语义。</p>
+          </div>
+          <div class="card protocol-card accent-card">
+            <b>RTSP</b>
+            <h4>实时流控制</h4>
+            <p>RTSP 负责 DESCRIBE、SETUP、PLAY 等会话控制，媒体数据通常通过 RTP 连续传输。</p>
+          </div>
+          <div class="card protocol-card purple-card">
+            <b>RTC</b>
+            <h4>业务包回调</h4>
+            <p>项目内私有 RTC 更像 <code>RPC_CALLBACK</code>：不返回 URL，而是订阅 <code>StreamPacket</code>。</p>
+          </div>
+        </div>
+
+        <h3>HLS：服务端先切片，再让客户端按列表取片</h3>
+        <p>HLS 的核心不是低延迟，而是 HTTP 化的稳定分发。服务端把连续媒体流切成一段段媒体分片，同时维护一个播放列表。客户端不断刷新 <code>.m3u8</code>，再按列表下载分片。</p>
+
+        <div class="svg-panel">
+          <svg class="svg-diagram" viewBox="0 0 920 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="HLS 原理图">
+            <defs>
+              <marker id="arrowA" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <polygon points="0,0 6,3 0,6" fill="var(--svg-connector)"/>
+              </marker>
+            </defs>
+            <text x="32" y="42" class="svg-title">HLS：m3u8 播放列表 + 媒体分片</text>
+            <text x="32" y="66" class="svg-subtitle">优势是稳定、可分发、天然有片段；代价是等待分片和播放列表更新。</text>
+
+            <rect x="36" y="104" width="142" height="64" rx="8" fill="var(--svg-blue-bg)" stroke="var(--svg-blue-mid)"/>
+            <text x="107" y="131" text-anchor="middle" class="svg-label">采集编码</text>
+            <text x="107" y="151" text-anchor="middle" class="svg-small">H264 / AAC</text>
+            <line x1="178" y1="136" x2="226" y2="136" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowA)"/>
+
+            <rect x="232" y="104" width="156" height="64" rx="8" fill="var(--svg-teal-bg)" stroke="var(--svg-teal-mid)"/>
+            <text x="310" y="131" text-anchor="middle" class="svg-label">切成分片</text>
+            <text x="310" y="151" text-anchor="middle" class="svg-small">seg-001.ts / seg-002.ts</text>
+            <line x1="388" y1="136" x2="436" y2="136" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowA)"/>
+
+            <rect x="442" y="104" width="152" height="64" rx="8" fill="var(--svg-amber-bg)" stroke="var(--svg-amber-mid)"/>
+            <text x="518" y="131" text-anchor="middle" class="svg-label">更新 m3u8</text>
+            <text x="518" y="151" text-anchor="middle" class="svg-small">维护最新分片列表</text>
+            <line x1="594" y1="136" x2="642" y2="136" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowA)"/>
+
+            <rect x="648" y="104" width="220" height="64" rx="8" fill="var(--svg-purple-bg)" stroke="var(--svg-purple-mid)"/>
+            <text x="758" y="131" text-anchor="middle" class="svg-label">客户端轮询并下载</text>
+            <text x="758" y="151" text-anchor="middle" class="svg-small">播放 / 回放 / 按片分析</text>
+          </svg>
+        </div>
+
+        <h3>HTTP-TS：不强调播放列表，强调 TS 流的直接消费</h3>
+        <p>HTTP-TS 可以理解为通过 HTTP 输出 TS 形态的连续媒体数据。它通常比 HLS 少一层播放列表轮询，链路更直接；但它也不像 HLS 那样天然提供分片索引、窗口列表和回放管理。</p>
+        <p>因此，HTTP-TS 更适合“我需要 TS 封装，但我不一定需要服务端帮我管理一堆可回放分片”的场景。AI 服务可以持续读取 TS，再按自己的窗口策略做二次切片、缓存或投递。</p>
+
+        <h3>RTSP：先控制会话，再接收实时媒体</h3>
+        <p>RTSP 是很多摄像头、NVR、播放器和算法组件都支持的实时流协议。客户端先获取媒体描述，再建立媒体通道，最后开始拉流。它的价值在于标准生态和实时拉流，而不是服务端切片。</p>
+
+        <div class="problem-flow">
+          <div class="pf-box">
+            <b>DESCRIBE</b>
+            <span>获取 SDP 或媒体描述</span>
+            <small>知道有哪些 track、编码格式和传输参数。</small>
+          </div>
+          <div class="pf-arrow">→</div>
+          <div class="pf-box pf-decision">
+            <b>SETUP</b>
+            <span>建立媒体通道</span>
+            <small>准备 RTP over UDP/TCP 等传输方式。</small>
+          </div>
+          <div class="pf-arrow">→</div>
+          <div class="pf-box">
+            <b>PLAY</b>
+            <span>开始实时拉流</span>
+            <small>客户端持续接收音视频数据。</small>
+          </div>
+        </div>
+
+        <h3>私有 RTC：业务直接订阅编码包</h3>
+        <p>项目内私有 RTC 不是标准 WebRTC，更接近当前接口里的 <code>RPC_CALLBACK</code>。它不把输出包装成播放器 URL，而是通过订阅接口持续推送媒体包。包里可以带上 <code>timestamp_ms</code>、<code>seq</code>、<code>payload_format</code>、<code>is_keyframe</code> 等字段。</p>
+        <p>这类通道对播放器不一定友好，但对 AI 很友好：AI 可以看到时间戳、关键帧、轨道类型和序号，能更容易做窗口聚合、丢包检测、A/V 对齐和关键帧恢复。</p>
+      </section>
+
+      <section id="comparison">
+        <h2>2. 它们真正的差异</h2>
+        <p>协议差异不是“谁高级谁低级”，而是“谁把哪一层工作提前做掉”。HLS 把切片和索引提前做了；RTSP 把实时拉流标准化了；HTTP-TS 把 TS 封装放到 HTTP 上；私有 RTC 把播放器语义拿掉，直接把业务需要的包暴露出来。</p>
+
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>协议</th>
+              <th>核心模型</th>
+              <th>延迟倾向</th>
+              <th>最大优势</th>
+              <th>主要代价</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>HLS</code></td>
+              <td>m3u8 播放列表 + TS/fMP4 分片</td>
+              <td>偏高，通常受分片长度和缓冲影响</td>
+              <td>天然分片、HTTP 友好、便于回放和分发</td>
+              <td>不适合强实时闭环</td>
+            </tr>
+            <tr>
+              <td><code>HTTP-TS</code></td>
+              <td>HTTP URL 持续输出 TS 数据</td>
+              <td>中低，通常低于传统 HLS</td>
+              <td>接入简单，保留 TS 封装，适合实时消费</td>
+              <td>缺少 m3u8 的片段索引和回放管理</td>
+            </tr>
+            <tr>
+              <td><code>RTSP</code></td>
+              <td>RTSP 控制 + RTP 媒体传输</td>
+              <td>低</td>
+              <td>标准生态成熟，第三方算法和工具易接</td>
+              <td>不是切片协议，复杂网络下维护成本更高</td>
+            </tr>
+            <tr>
+              <td>私有 <code>RTC</code></td>
+              <td>订阅业务媒体包，例如 StreamPacket</td>
+              <td>最低或最可控</td>
+              <td>帧级控制、时间戳、序号、关键帧语义清楚</td>
+              <td>客户端要适配私有协议，通用生态较弱</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note warn">
+          <strong>注意：</strong>“延迟低”不等于“一定适合 AI”。如果 AI 任务是异步按片分析，稳定切片和可追溯可能比毫秒级实时更重要。反过来，如果 AI 任务是课堂实时提醒、画面质量即时检测，分片协议的稳定性就不一定抵得过私有 RTC 的帧级控制。
+        </div>
+      </section>
+
+      <section id="slicing">
+        <h2>3. AI 切片怎么理解</h2>
+        <p>讨论 AI 切片时，最关键的是区分“传输切片”和“算法切片”。这两个词听起来都叫切片，但工程含义完全不同。</p>
+
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>切片类型</th>
+              <th>本质</th>
+              <th>更适合的协议</th>
+              <th>原因</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>传输切片</td>
+              <td>服务端直接产出 TS/fMP4 分片</td>
+              <td><code>HLS</code></td>
+              <td>天然有分片文件和 m3u8 索引，便于按片消费、回放和追溯。</td>
+            </tr>
+            <tr>
+              <td>TS 流式消费</td>
+              <td>业务侧持续读取 TS，再自行按时间窗口切</td>
+              <td><code>HTTP-TS</code></td>
+              <td>保留 TS 封装，HTTP 接入简单，少了 HLS playlist 轮询。</td>
+            </tr>
+            <tr>
+              <td>算法窗口切片</td>
+              <td>AI 根据时间戳、关键帧、事件窗口聚合帧</td>
+              <td>私有 <code>RTC</code></td>
+              <td>直接拿到包、时间戳、序号和关键帧语义，窗口可控性最好。</td>
+            </tr>
+            <tr>
+              <td>标准流后置切片</td>
+              <td>先拉实时流，再由 AI 或中间层切片</td>
+              <td><code>RTSP</code></td>
+              <td>适合算法只支持标准流 URL 的情况，但切片成本后移。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="two-col">
+          <div class="card good">
+            <h4>需要服务端已经切好的 TS 片段：选 HLS</h4>
+            <p>如果 AI 的输入、存储、上传或回放链路都是围绕一段段媒体分片组织的，HLS 是更自然的选择。它不只是给你 TS 数据，还给你分片边界、播放列表和片段生命周期。</p>
+          </div>
+          <div class="card warn">
+            <h4>只需要 TS 形态的实时数据：选 HTTP-TS</h4>
+            <p>如果 AI 只是希望输入是 TS 容器，但窗口大小、缓存策略、投递节奏由算法服务自己决定，HTTP-TS 会比 HLS 更轻，也通常更接近实时。</p>
+          </div>
+        </div>
+
+        <p>所以，“AI 需要做切片”不能直接等价为“必须用 HLS”。如果切片边界、索引、回放和片段管理都希望由服务端提供，HLS 更好；如果只是希望拿到 TS 容器，然后 AI 侧按自己的逻辑切窗口，HTTP-TS 更合适。</p>
+
+        <div class="note ok">
+          <strong>对当前 AI 业务的修正建议：</strong>如果大多数任务真的围绕 TS 切片处理，选型优先级应从“私有 RTC / RTSP”前移到“HLS / HTTP-TS”。私有 RTC 仍然适合低延迟、帧级和关键帧可控的任务，但不应强行替代已有 TS 切片链路。
+        </div>
+      </section>
+
+      <section id="decision">
+        <h2>4. AI 业务怎么选</h2>
+        <p>实际选型可以用一个问题树收敛：AI 是要片、要流，还是要帧？这个问题比“哪个协议更先进”更有效。</p>
+
+        <div class="svg-panel">
+          <svg class="svg-diagram" viewBox="0 0 920 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AI 协议选型决策树">
+            <defs>
+              <marker id="arrowB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <polygon points="0,0 6,3 0,6" fill="var(--svg-connector)"/>
+              </marker>
+            </defs>
+            <text x="34" y="42" class="svg-title">AI 协议选型决策树</text>
+            <text x="34" y="66" class="svg-subtitle">先判断 AI 消费对象，再判断延迟、生态和片段管理需求。</text>
+
+            <rect x="330" y="96" width="260" height="66" rx="10" fill="var(--svg-blue-bg)" stroke="var(--svg-blue-mid)"/>
+            <text x="460" y="124" text-anchor="middle" class="svg-label">AI 到底消费什么？</text>
+            <text x="460" y="146" text-anchor="middle" class="svg-small">TS 片段 / TS 流 / 标准流 / 编码包</text>
+
+            <line x1="460" y1="162" x2="190" y2="230" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowB)"/>
+            <line x1="460" y1="162" x2="390" y2="230" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowB)"/>
+            <line x1="460" y1="162" x2="590" y2="230" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowB)"/>
+            <line x1="460" y1="162" x2="760" y2="230" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowB)"/>
+
+            <rect x="66" y="232" width="210" height="78" rx="10" fill="var(--svg-teal-bg)" stroke="var(--svg-teal-mid)"/>
+            <text x="171" y="260" text-anchor="middle" class="svg-label">服务端切好的片</text>
+            <text x="171" y="282" text-anchor="middle" class="svg-small">m3u8 / TS segments</text>
+            <text x="171" y="300" text-anchor="middle" class="svg-small">回放、追溯、按片上传</text>
+
+            <rect x="310" y="232" width="180" height="78" rx="10" fill="var(--svg-amber-bg)" stroke="var(--svg-amber-mid)"/>
+            <text x="400" y="260" text-anchor="middle" class="svg-label">TS 实时流</text>
+            <text x="400" y="282" text-anchor="middle" class="svg-small">自行缓存和切窗口</text>
+            <text x="400" y="300" text-anchor="middle" class="svg-small">更轻、更直接</text>
+
+            <rect x="526" y="232" width="170" height="78" rx="10" fill="var(--svg-blue-bg)" stroke="var(--svg-blue-mid)"/>
+            <text x="611" y="260" text-anchor="middle" class="svg-label">标准实时 URL</text>
+            <text x="611" y="282" text-anchor="middle" class="svg-small">ffmpeg / OpenCV</text>
+            <text x="611" y="300" text-anchor="middle" class="svg-small">第三方兼容</text>
+
+            <rect x="730" y="232" width="160" height="78" rx="10" fill="var(--svg-purple-bg)" stroke="var(--svg-purple-mid)"/>
+            <text x="810" y="260" text-anchor="middle" class="svg-label">帧级编码包</text>
+            <text x="810" y="282" text-anchor="middle" class="svg-small">timestamp / seq</text>
+            <text x="810" y="300" text-anchor="middle" class="svg-small">关键帧可控</text>
+
+            <line x1="171" y1="310" x2="171" y2="370" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowB)"/>
+            <line x1="400" y1="310" x2="400" y2="370" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowB)"/>
+            <line x1="611" y1="310" x2="611" y2="370" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowB)"/>
+            <line x1="810" y1="310" x2="810" y2="370" stroke="var(--svg-connector)" stroke-width="2" marker-end="url(#arrowB)"/>
+
+            <rect x="86" y="374" width="170" height="68" rx="10" fill="var(--svg-teal)" opacity="0.95"/>
+            <text x="171" y="404" text-anchor="middle" fill="#fff" font-size="18" font-weight="800">HLS</text>
+            <text x="171" y="426" text-anchor="middle" fill="#e8fff7" font-size="12">切片 + 索引 + 回放</text>
+
+            <rect x="315" y="374" width="170" height="68" rx="10" fill="var(--svg-amber)" opacity="0.95"/>
+            <text x="400" y="404" text-anchor="middle" fill="#fff" font-size="18" font-weight="800">HTTP-TS</text>
+            <text x="400" y="426" text-anchor="middle" fill="#fff5df" font-size="12">TS 流 + 自行切片</text>
+
+            <rect x="526" y="374" width="170" height="68" rx="10" fill="var(--svg-blue)" opacity="0.95"/>
+            <text x="611" y="404" text-anchor="middle" fill="#fff" font-size="18" font-weight="800">RTSP</text>
+            <text x="611" y="426" text-anchor="middle" fill="#edf3ff" font-size="12">标准生态兼容</text>
+
+            <rect x="725" y="374" width="170" height="68" rx="10" fill="var(--svg-purple)" opacity="0.95"/>
+            <text x="810" y="404" text-anchor="middle" fill="#fff" font-size="18" font-weight="800">私有 RTC</text>
+            <text x="810" y="426" text-anchor="middle" fill="#f4f0ff" font-size="12">低延迟 + 帧级控制</text>
+          </svg>
+        </div>
+
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>业务诉求</th>
+              <th>优先选择</th>
+              <th>不优先选什么</th>
+              <th>判断依据</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AI 输入就是 TS 分片</td>
+              <td><code>HLS</code></td>
+              <td><code>RTSP</code> 后置切片</td>
+              <td>HLS 已经把分片、索引和窗口管理前置到服务端。</td>
+            </tr>
+            <tr>
+              <td>AI 需要 TS 容器，但自己决定窗口</td>
+              <td><code>HTTP-TS</code></td>
+              <td>完整 HLS 链路</td>
+              <td>省掉 m3u8 轮询，读取一条 TS 流即可。</td>
+            </tr>
+            <tr>
+              <td>第三方算法只支持标准 URL</td>
+              <td><code>RTSP</code></td>
+              <td>私有 RTC</td>
+              <td>ffmpeg、OpenCV、GStreamer 等生态更容易接。</td>
+            </tr>
+            <tr>
+              <td>实时检测、帧级分析、关键帧窗口</td>
+              <td>私有 <code>RTC</code></td>
+              <td><code>HLS</code></td>
+              <td>HLS 的分片和缓冲会牺牲实时性；私有通道能暴露包级元数据。</td>
+            </tr>
+            <tr>
+              <td>人工预览 + AI 分析并存</td>
+              <td>双通道</td>
+              <td>单协议强行覆盖所有场景</td>
+              <td>人看视频和 AI 算数据的诉求不同，应拆开优化。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="project">
+        <h2>5. 放到项目里怎么落地</h2>
+        <p>在当前项目里，流媒体协议会返回不同形态的 <code>stream_url</code>：HLS 是 <code>.../hls.m3u8</code>，HTTP-TS 是 <code>...live.ts</code>，RTSP 是 <code>rtsp://...</code>。私有 RTC 则更接近 <code>RPC_CALLBACK</code>：创建会话后 <code>stream_url</code> 为空，通过 <code>SubscribePackets</code> 接收数据。</p>
+
+        <div class="figure">
+          <div class="figure-title">
+            <strong>项目内可以把输出分成两类</strong>
+            <span>URL 拉流 vs 业务包订阅</span>
+          </div>
+          <div class="figure-body">
+            <div class="two-col">
+              <div class="card accent-card">
+                <h4>URL 拉流类</h4>
+                <p><code>RTSP</code>、<code>HLS</code>、<code>HTTP_TS</code> 都启动媒体服务并返回 URL。它们适合播放器、第三方算法、HTTP 消费链路，以及需要标准协议接入的系统。</p>
+              </div>
+              <div class="card purple-card">
+                <h4>包订阅类</h4>
+                <p><code>RPC_CALLBACK</code> 不返回流媒体 URL，而是推送 <code>StreamPacket</code>。它适合需要 <code>timestamp_ms</code>、<code>seq</code>、<code>is_keyframe</code> 的 AI 实时处理链路。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p>因此，AI 业务可以按“算法输入契约”分层接入，而不是所有算法都统一压到同一个协议上。</p>
+
+        <div class="problem-flow">
+          <div class="pf-box">
+            <b>第一层</b>
+            <span>算法是否要求 TS 片段？</span>
+            <small>如果要求按片上传、按片落盘、按片回放，优先 HLS。</small>
+          </div>
+          <div class="pf-arrow">→</div>
+          <div class="pf-box pf-decision">
+            <b>第二层</b>
+            <span>算法是否只需要 TS 流？</span>
+            <small>如果自己切窗口、自己管缓存，优先 HTTP-TS。</small>
+          </div>
+          <div class="pf-arrow">→</div>
+          <div class="pf-box">
+            <b>第三层</b>
+            <span>算法是否要帧级控制？</span>
+            <small>如果需要关键帧、序号、低延迟闭环，优先私有 RTC。</small>
+          </div>
+        </div>
+
+        <div class="note warn">
+          <strong>不要把“AI 需要切片”一概翻译成“AI 需要私有 RTC”。</strong>如果切片产物是 TS 文件或 TS 容器，HLS/HTTP-TS 能少走很多后置转封装逻辑。私有 RTC 的优势在于包级控制，而不是天然替代 TS 切片协议。
+        </div>
+      </section>
+
+      <section id="conclusion">
+        <h2>结尾：一个判断口诀</h2>
+        <p>协议选型可以压缩成一句话：人看视频，优先播放器协议；AI 算数据，优先看输入契约。</p>
+
+        <div class="mini-summary">
+          <div>
+            <b>要服务端切好的片</b>
+            <span>选 HLS，它负责切片、索引、回放窗口和片段生命周期。</span>
+          </div>
+          <div>
+            <b>要 TS 形态的实时流</b>
+            <span>选 HTTP-TS，它保留 TS 封装，也让 AI 侧自己控制窗口。</span>
+          </div>
+          <div>
+            <b>要标准实时 URL</b>
+            <span>选 RTSP，它最大价值是生态兼容和通用工具链接入。</span>
+          </div>
+          <div>
+            <b>要帧级元数据和低延迟控制</b>
+            <span>选私有 RTC，它把时间戳、序号和关键帧语义交给业务。</span>
+          </div>
+        </div>
+
+        <div class="note ok">
+          <strong>最终建议：</strong>当前 AI 如果更多围绕 TS 切片工作，主路径应优先验证 HLS 和 HTTP-TS。HLS 适合“服务端切好并管理分片”；HTTP-TS 适合“AI 侧实时读取 TS 并自行切窗口”。私有 RTC 保留给低延迟、帧级、关键帧可控的实时 AI 场景，RTSP 保留给通用生态兼容。
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2026 zixuan
+  </footer>
+</body>
+</html>
